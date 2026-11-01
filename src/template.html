@@ -1,0 +1,2477 @@
+<!doctype html>
+<html lang="{{lang}}" dir="{{dir}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}}</title>
+<meta name="description" content="{{description}}">
+<meta name="theme-color" content="#03040a">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3CradialGradient id='g'%3E%3Cstop offset='0' stop-color='%23dbe7ff' stop-opacity='.85'/%3E%3Cstop offset='.4' stop-color='%239cc2ff' stop-opacity='.35'/%3E%3Cstop offset='1' stop-color='%239cc2ff' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='%2305071a'/%3E%3Cpath d='M9 53L21 40L33 47L44 21L56 35' fill='none' stroke='%238fb4f5' stroke-opacity='.9' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cg fill='%23c4d8ff'%3E%3Ccircle cx='9' cy='53' r='4.4'/%3E%3Ccircle cx='21' cy='40' r='4.6'/%3E%3Ccircle cx='33' cy='47' r='4.2'/%3E%3Ccircle cx='56' cy='35' r='4.4'/%3E%3C/g%3E%3Ccircle cx='44' cy='21' r='13' fill='url%28%23g%29'/%3E%3Cpath d='M44 6l2.4 12.6L59 21l-12.6 2.4L44 36l-2.4-12.6L29 21l12.6-2.4z' fill='%23eef3ff'/%3E%3Ccircle cx='44' cy='21' r='5' fill='%23fff'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AI_Rulet">
+<meta property="og:title" content="{{title}}">
+<meta property="og:description" content="{{og_description}}">
+<meta property="og:url" content="{{page_url}}">
+<meta property="og:locale" content="{{locale}}">
+<meta name="twitter:card" content="summary">
+{{@hreflang}}<style>
+:root{
+  --serif:"Palatino Linotype","Book Antiqua",Palatino,"URW Palladio L",Georgia,"Times New Roman",serif;
+  --bg:#03040a; --bg2:#0b1028; --ink:#e7ecff; --ink-dim:#9ba5c9; --ink-faint:#7c86aa;
+  --acc:#9cc2ff; --acc-hi:#eef3ff; --acc-lo:#4b5ea8; --line:rgba(156,194,255,.20);
+  --card:rgba(10,14,34,.55); --glow:170,200,255;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  min-height:100vh; font-family:var(--serif); color:var(--ink); background-color:var(--bg);
+  line-height:1.55; overflow-x:hidden; -webkit-font-smoothing:antialiased;
+}
+/* Неподвижные слои фона высотой в «большой» экран (lvh): на телефоне адресная строка при прокрутке
+   прячется и появляется, обычная высота окна при этом меняется, а lvh — нет, и фон не дёргается */
+body::before,.sky,.neb,#stars{position:fixed; top:0; left:0; width:100%; height:100vh; height:100lvh; pointer-events:none; z-index:0}
+body::before{content:""; background:radial-gradient(ellipse 80% 60% at 50% 32%, var(--bg2) 0%, var(--bg) 72%)}
+/* ——— Глубокий космос ——— */
+.sky{
+  overflow:hidden; opacity:0;
+  transition:opacity 2.4s ease, transform 2.8s cubic-bezier(.3,0,.2,1);
+}
+.sky.ready{opacity:1}
+.sky canvas{position:absolute; left:-8%; top:-8%; width:116%; height:116%; animation:drift 160s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translate3d(-1.5%,-1%,0) rotate(-.4deg)} to{transform:translate3d(1.5%,1%,0) rotate(.4deg)}}
+body.spinning .sky{transform:scale(1.07)}
+.neb{overflow:hidden; opacity:0; transition:opacity 3s ease}
+.neb.ready{opacity:1}
+/* приглушение космоса, пока читаешь карточку: тёмная вуаль между фоном и содержимым */
+body::after{
+  content:""; position:fixed; top:0; left:0; width:100%; height:100vh; height:100lvh; pointer-events:none; z-index:0;
+  background:rgba(3,4,10,.3); opacity:0; transition:opacity 1.2s ease;
+}
+body.reading::after{opacity:1}
+.neb canvas{position:absolute; inset:0; width:100%; height:100%}
+.wrap{position:relative; z-index:1; max-width:780px; margin:0 auto; padding:28px 16px 40px}
+button{font-family:inherit; color:inherit}
+
+/* ——— Шапка ——— */
+header.top{text-align:center; padding-top:22px; position:relative}
+.tools{position:absolute; right:0; top:0; z-index:2; display:flex; gap:10px}
+.icon-btn{
+  position:relative; width:38px; height:38px; padding:0; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+  background:transparent; border:1px solid var(--line); color:var(--ink-faint); font-size:17px; cursor:pointer;
+  transition:border-color .3s, color .3s, box-shadow .3s;
+}
+.icon-btn svg{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.4; stroke-linecap:round}
+.icon-btn:hover,.icon-btn[aria-expanded="true"]{border-color:var(--acc); color:var(--acc-hi)}
+.icon-btn[aria-pressed="true"]{color:var(--acc-hi); border-color:var(--acc); box-shadow:0 0 12px rgba(var(--glow),.35)}
+.icon-btn[aria-pressed="false"]::after{   /* перечёркнутая нота — звук выключен */
+  content:""; position:absolute; left:10px; right:10px; top:50%; height:1px; background:currentColor; transform:rotate(-45deg);
+}
+.logo{
+  margin:0; font-weight:400; font-size:clamp(34px,7vw,54px); letter-spacing:.32em; padding-left:.32em;
+  font-variant:small-caps; line-height:1.1;
+  background:linear-gradient(180deg, var(--acc-hi) 0%, var(--acc) 55%, var(--acc-lo) 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(0 0 14px rgba(var(--glow),.22));
+}
+.tagline{margin:6px 0 0; font-style:italic; color:var(--ink-dim); font-size:15px}
+.divider{display:flex; align-items:center; justify-content:center; gap:12px; color:var(--acc); font-size:9px; margin:18px auto 0; max-width:340px}
+.divider span{flex:1; height:1px; background:linear-gradient(90deg, transparent, var(--acc))}
+.divider span:last-child{background:linear-gradient(270deg, transparent, var(--acc))}
+
+/* ——— Барабан ——— */
+.stage{position:relative; height:360px; margin:14px 0 0}
+/* поток идей: края сцены растворяются в космосе — идеи появляются из пустоты и уходят в неё */
+.drum{
+  position:absolute; inset:0; overflow:hidden;
+  /* края сцены гаснут до полной прозрачности со всех четырёх сторон: две линейные маски пересекаются.
+     Радиальная маска шире сцены не гасила боковые края, и обрезка (overflow:hidden) проступала прямоугольником */
+  -webkit-mask-image:linear-gradient(to right, transparent, #000 12%, #000 88%, transparent), linear-gradient(to bottom, transparent, #000 20%, #000 80%, transparent);
+  -webkit-mask-composite:source-in;
+  mask-image:linear-gradient(to right, transparent, #000 12%, #000 88%, transparent), linear-gradient(to bottom, transparent, #000 20%, #000 80%, transparent);
+  mask-composite:intersect;
+}
+.item{
+  position:absolute; left:50%; top:50%; width:min(76%,620px); transform:translate(-50%,-50%);   /* уже зоны, где гаснет маска */
+  display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; will-change:transform, opacity;
+}
+.c-cat{font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--acc); opacity:.75; white-space:nowrap}
+.c-title{
+  font-size:25px; line-height:1.25; color:var(--ink); transition:color .5s, text-shadow .5s;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.item.chosen .c-title{color:var(--acc-hi); text-shadow:0 0 18px rgba(var(--glow),.6)}
+/* дальние и пролетающие идеи размыты: прозрачный текст с мягкой тенью размывает сами буквы.
+   CSS-фильтр blur здесь не годится — он размывает прямоугольный слой, и его край проступает линией */
+.item.soft .c-title{color:transparent; text-shadow:0 0 6px rgba(231,236,255,.9)}
+.item.soft .c-cat{color:transparent; text-shadow:0 0 4px rgba(156,194,255,.85)}
+.stream.idle .item:not(.focus){opacity:0 !important; transition:opacity .6s ease}   /* в покое — только идея в центре */
+/* маяк до первого броска: мерцающая звезда в точке, откуда прилетит идея */
+.beacon{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  pointer-events:none; transition:opacity .5s ease, transform .6s ease;
+}
+.beacon i{
+  position:relative; width:9px; height:9px; border-radius:50%; background:var(--acc-hi);
+  box-shadow:0 0 12px 4px rgba(var(--glow),.8), 0 0 40px 14px rgba(var(--glow),.35), 0 0 90px 30px rgba(var(--glow),.12);
+  animation:beacon 2.6s ease-in-out infinite;
+}
+.beacon i::before,.beacon i::after{content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%)}
+.beacon i::before{width:96px; height:1px; background:linear-gradient(90deg, transparent, rgba(var(--glow),.75), transparent)}
+.beacon i::after{width:1px; height:96px; background:linear-gradient(180deg, transparent, rgba(var(--glow),.75), transparent)}
+@keyframes beacon{0%,100%{transform:scale(.85); opacity:.75} 50%{transform:scale(1.15); opacity:1}}
+.beacon.gone{opacity:0; transform:scale(.6)}
+/* вспышка, когда идея прилетает */
+.flare{
+  position:absolute; left:50%; top:50%; width:440px; height:440px; margin:-220px 0 0 -220px; border-radius:50%; pointer-events:none; opacity:0;
+  background:radial-gradient(circle, rgba(var(--glow),.42) 0%, rgba(var(--glow),.12) 32%, transparent 68%);
+}
+.flare.pop{animation:flare 1.2s cubic-bezier(.2,.7,.2,1)}
+@keyframes flare{from{opacity:.95; transform:scale(.3)} to{opacity:0; transform:scale(1.5)}}
+/* анимации поиска: у каждой свой слой внутри сцены, виден только выбранный */
+.anim{position:absolute; inset:0}
+.anim:not(.on){display:none}
+.stage.waiting .anim{visibility:hidden}
+/* «Расшифровка сигнала» */
+.dec{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; text-align:center}
+.dec .cat{min-height:1.3em; font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--acc); opacity:.8}
+.dec .ttl{max-width:min(76%,620px); font-size:25px; line-height:1.25}
+.dec .ttl .n{color:var(--acc); opacity:.55}
+.dec.done .ttl{color:var(--acc-hi); text-shadow:0 0 18px rgba(var(--glow),.6)}
+/* «Созвездие» */
+.links{position:absolute; inset:0; width:100%; height:100%}
+.anim.const{animation:constIn .7s ease}   /* новое созвездие проявляется, а не появляется скачком */
+@keyframes constIn{from{opacity:0}}
+.st{
+  position:absolute; width:6px; height:6px; margin:-3px 0 0 -3px; border-radius:50%; background:#dfe8ff;
+  box-shadow:0 0 8px 2px rgba(var(--glow),.5); outline:1px solid transparent; outline-offset:4px;
+  transition:transform .25s, box-shadow .25s, width .25s, height .25s, margin .25s, outline-color .4s;
+}
+.st.hit{transform:scale(2.2); box-shadow:0 0 16px 6px rgba(var(--glow),.85)}
+/* выбранная звезда растёт размером, а не transform: scale — увеличение утраивало ошибку округления до пикселя,
+   и звезда съезжала из кольца; кольцо — контур самой звезды, поэтому всегда точно вокруг неё */
+.st.win{width:18px; height:18px; margin:-9px 0 0 -9px; outline-color:rgba(var(--glow),.9); box-shadow:0 0 22px 9px rgba(var(--glow),.9), 0 0 60px 20px rgba(var(--glow),.3)}
+.ptr{
+  position:absolute; width:28px; height:28px; margin:-14px 0 0 -14px; border-radius:50%; pointer-events:none;
+  border:1px solid rgba(var(--glow),.9); box-shadow:0 0 16px rgba(var(--glow),.6), inset 0 0 10px rgba(var(--glow),.35);
+  transition-property:left, top, opacity; transition-timing-function:ease-out;
+}
+.ptr.off{opacity:0}   /* на остановке подвижное кольцо гаснет — его сменяет кольцо выбранной звезды */
+.slbl{position:absolute; transform:translate(-50%, 14px); font-size:12px; color:var(--ink-dim); white-space:nowrap; opacity:0; transition:opacity .2s}
+.slbl.on{opacity:.9}
+/* название найденной идеи — в «Созвездии» и «Полёте к звезде»; выше нижней зоны, где гаснет маска */
+.won{
+  position:absolute; left:0; right:0; bottom:23%; padding:0 12%; text-align:center; font-size:23px; line-height:1.25; color:var(--acc-hi);
+  text-shadow:0 0 18px rgba(var(--glow),.6); opacity:0; transform:translateY(8px); transition:opacity .6s, transform .6s;
+}
+.won.show{opacity:1; transform:none}
+.won small{display:block; margin-bottom:4px; font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--acc); text-shadow:none}
+.deep canvas{position:absolute; inset:0; width:100%; height:100%}
+
+/* ——— Кнопка ——— */
+.actions{text-align:center; margin-top:8px}
+.spin{
+  font-size:17px; letter-spacing:.2em; text-transform:uppercase; padding:14px 34px; cursor:pointer;
+  background:linear-gradient(180deg, rgba(var(--glow),.10), rgba(var(--glow),.02));
+  border:1px solid var(--acc); color:var(--acc-hi); border-radius:2px;
+  box-shadow:inset 0 0 0 3px transparent, 0 0 0 rgba(var(--glow),0);
+  transition:box-shadow .35s, background .35s, opacity .3s, transform .15s;
+}
+.spin:hover:not(:disabled){box-shadow:inset 0 0 0 3px rgba(var(--glow),.08), 0 0 26px rgba(var(--glow),.28); background:rgba(var(--glow),.12)}
+.spin:active:not(:disabled){transform:translateY(1px)}
+.spin:disabled{opacity:.45; cursor:default}
+.spin:focus-visible,.icon-btn:focus-visible,.seg button:focus-visible,.chip:focus-visible,.sheet .x:focus-visible,.tab:focus-visible{outline:1px dashed var(--acc-hi); outline-offset:3px}
+.hint{margin:10px 0 0; font-size:13px; color:var(--ink-faint); font-style:italic; min-height:1.4em}
+
+/* ——— Карточка идеи ——— */
+.card{
+  position:relative; margin:30px 0 0; padding:30px 30px 26px; background:var(--card);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+}
+.card::before,.card::after{
+  content:""; position:absolute; left:0; right:0; height:1px;
+  background:linear-gradient(90deg, transparent, var(--acc) 20%, var(--acc-hi) 50%, var(--acc) 80%, transparent);
+  box-shadow:0 0 10px rgba(var(--glow),.5);
+}
+.card::before{top:0} .card::after{bottom:0}
+.card.show{animation:unfurl .42s cubic-bezier(.2,.7,.2,1)}
+@keyframes unfurl{from{opacity:0; filter:blur(8px); transform:scale(.985)} to{opacity:1; filter:none; transform:none}}
+.card .empty{margin:0; text-align:center; color:var(--ink-dim); font-style:italic}
+.card .meta{font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:var(--acc)}
+.card .meta em{text-transform:none; letter-spacing:.02em; font-size:14px; color:var(--ink-dim)}
+.card h2{margin:6px 0 12px; font-weight:400; font-size:clamp(23px,4.4vw,30px); line-height:1.25}
+.card p.desc{margin:0 0 16px; font-size:17px}
+.tags{display:flex; flex-wrap:wrap; gap:8px; margin:0 0 18px; padding:0; list-style:none}
+.tags li{font-size:13px; padding:3px 11px; border:1px solid var(--line); border-radius:999px; color:var(--ink-dim)}
+.tags li b{font-weight:400; color:var(--acc)}
+.card h3{margin:18px 0 6px; font-weight:400; font-size:13px; letter-spacing:.24em; text-transform:uppercase; color:var(--acc)}
+.card ol{margin:0; padding-left:22px}
+.card ol li{margin:3px 0}
+.card ol li::marker{color:var(--acc); font-variant-numeric:oldstyle-nums}
+.trial{margin:18px 0 0; padding:12px 16px; border-left:2px solid var(--acc); background:rgba(var(--glow),.06); font-style:italic}
+.trial b{font-style:normal; font-weight:400; letter-spacing:.18em; text-transform:uppercase; font-size:12px; color:var(--acc); display:block; margin-bottom:2px}
+.card-actions{display:flex; flex-wrap:wrap; gap:10px; margin-top:22px}
+.card-ask{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:12px}
+.card-ask > span{color:var(--ink-dim); font-style:italic; font-size:14px; margin-right:2px}
+.ghost{
+  font-size:14px; padding:8px 16px; cursor:pointer; background:transparent; border:1px solid var(--line);
+  color:var(--ink-dim); border-radius:2px; transition:border-color .25s, color .25s;
+}
+.ghost:hover{border-color:var(--acc); color:var(--acc-hi)}
+a.ghost{display:inline-block; line-height:normal; text-decoration:none}
+
+/* ——— Выдвижные панели: параметры пространства и хроника ——— */
+.veil{position:fixed; inset:0; z-index:19; background:rgba(2,3,8,.55); opacity:0; visibility:hidden; transition:opacity .3s, visibility 0s .3s}
+.veil.on{opacity:1; visibility:visible; transition:opacity .3s}
+.sheet{
+  position:fixed; top:0; right:0; z-index:20; width:min(420px,100%); height:100%; overflow-y:auto; padding:18px 22px 30px;
+  background:rgba(7,10,24,.94); border-left:1px solid var(--line); box-shadow:-20px 0 60px rgba(0,0,0,.5);
+  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  transform:translateX(100%); visibility:hidden; transition:transform .35s cubic-bezier(.2,.7,.2,1), visibility 0s .35s;
+}
+.sheet.open{transform:none; visibility:visible; transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+.sheet-head{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px}
+.sheet h2{margin:0; font-weight:400; font-size:13px; letter-spacing:.24em; text-transform:uppercase; color:var(--acc)}
+.sheet .x{flex:none; width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:transparent; color:var(--ink-dim); font-size:20px; line-height:1; cursor:pointer}
+.sheet .x:hover{border-color:var(--acc); color:var(--acc-hi)}
+.row.col{flex-direction:column; align-items:flex-start}
+.seg.stack{display:flex; flex-direction:column; width:100%}
+.seg.stack button{text-align:left; padding:9px 14px}
+.seg.stack button + button{border-left:0; border-top:1px solid var(--line)}
+.seg.stack small{display:block; margin-top:2px; font-size:12px; font-style:italic; color:var(--ink-faint)}
+/* справка */
+.help{color:var(--ink-dim); font-size:15px; line-height:1.6}
+.help p{margin:0 0 10px}
+.help .lead{color:var(--ink); font-size:16px}
+.help h3{margin:22px 0 8px; font-weight:400; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--acc)}
+.help ol,.help ul{margin:0 0 10px; padding-left:20px}
+.help li{margin:0 0 6px}
+.help li::marker{color:var(--acc)}
+.help b{font-weight:400; color:var(--ink)}
+.help dl{margin:0}
+.help dt{color:var(--ink); display:flex; align-items:center; gap:8px}
+.help dd{margin:0 0 10px}
+.help .icons dd{padding-left:28px}   /* под иконкой кнопки */
+.help .ico{flex:none; width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--line); border-radius:50%; font-size:11px; color:var(--acc)}
+.help .ico svg{width:12px; height:12px; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round}
+.help kbd{font:inherit; font-size:13px; padding:0 6px; border:1px solid var(--line); border-radius:3px; color:var(--ink)}
+.help .fine{font-size:13px; font-style:italic; color:var(--ink-faint)}
+.row{display:flex; align-items:center; flex-wrap:wrap; gap:10px 16px; margin:12px 0}
+.lbl{min-width:84px; color:var(--ink-dim); font-style:italic}
+.seg{display:inline-flex; flex-wrap:wrap; border:1px solid var(--line); border-radius:2px}
+.seg button{background:transparent; border:0; padding:7px 14px; cursor:pointer; color:var(--ink-dim); font-size:14px}
+.seg button + button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{color:var(--acc-hi); background:rgba(var(--glow),.10)}
+.chips{display:flex; flex-wrap:wrap; gap:8px; width:100%}
+.chips.off{opacity:.4; pointer-events:none}
+.chip{
+  font-size:14px; padding:5px 12px; border:1px solid var(--line); border-radius:999px; cursor:pointer; background:transparent; color:var(--ink-faint);
+  transition:color .2s, border-color .2s, background .2s;
+}
+.chip[aria-pressed="true"]{color:var(--ink); border-color:var(--acc); background:rgba(var(--glow),.07)}
+.chip span{color:var(--acc); margin-right:6px}
+.link{background:none; border:0; padding:0; color:var(--acc); cursor:pointer; font-style:italic; font-size:14px; text-decoration:underline; text-decoration-color:var(--line); text-underline-offset:3px}
+.tabs{display:flex; gap:22px; margin:6px 0 10px}
+.tab{background:none; border:0; padding:6px 0; cursor:pointer; font-size:13px; letter-spacing:.24em; text-transform:uppercase; color:var(--ink-faint); border-bottom:1px solid transparent}
+.tab[aria-selected="true"]{color:var(--acc); border-bottom-color:var(--acc)}
+.list{list-style:none; margin:0; padding:0}
+.list li{display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--line)}
+.list li .open{flex:1; min-width:0; text-align:left; background:none; border:0; padding:9px 0; cursor:pointer; color:var(--ink); font-size:15px; display:flex; gap:10px; align-items:baseline}
+.list li .open:hover{color:var(--acc-hi)}
+.list .r{color:var(--acc); flex:none}
+.list .t{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.list .del{background:none; border:0; color:var(--ink-faint); cursor:pointer; font-size:18px; padding:4px 6px}
+.list .del:hover{color:var(--acc-hi)}
+.list-empty{color:var(--ink-faint); font-style:italic; padding:8px 0; margin:0}
+.list-tools{display:flex; gap:16px; margin-top:12px}
+
+.langs{display:flex; flex-wrap:wrap; justify-content:center; gap:6px 14px; margin:14px 0 0; font-size:14px}   /* выбор языка */
+.langs a{color:var(--ink-faint); text-decoration:none; padding:2px 0; border-bottom:1px solid transparent}
+.langs a:hover{color:var(--acc-hi); border-bottom-color:var(--line)}
+.langs a[aria-current="page"]{color:var(--acc)}
+footer{margin-top:40px; text-align:center; color:var(--ink-faint); font-size:13px; font-style:italic}
+.toast{
+  position:fixed; left:50%; bottom:26px; transform:translate(-50%,20px); opacity:0; pointer-events:none; z-index:30;
+  padding:9px 18px; background:var(--card); border:1px solid var(--acc); color:var(--acc-hi); font-size:14px;
+  transition:opacity .3s, transform .3s; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+}
+.toast.on{opacity:1; transform:translate(-50%,0)}
+
+@media (max-width:560px){
+  .wrap{padding-top:18px}
+  .stage{height:300px}
+  .c-title{font-size:20px; -webkit-line-clamp:3}
+  .c-cat{font-size:10px}
+  .card{padding:24px 18px 20px}
+  .spin{padding:13px 24px; letter-spacing:.14em}
+  .logo{letter-spacing:.2em; padding-left:.2em}
+  .lbl{min-width:0; width:100%}
+  header.top{padding-top:0}
+  .tools{position:static; justify-content:flex-end; margin-bottom:10px}
+  .dec .ttl{font-size:20px}
+  .won{font-size:19px}
+}
+@media (prefers-reduced-motion:reduce){
+  .card.show{animation-duration:.01s}
+  .sky canvas{animation:none}
+  .beacon i{animation:none}
+  body.spinning .sky{transform:none}
+}
+</style>
+</head>
+<body>
+<div class="sky" id="skyWrap" aria-hidden="true"><canvas id="sky"></canvas></div>
+<div class="neb" id="neb" aria-hidden="true"></div>
+<canvas id="stars" aria-hidden="true"></canvas>
+<div class="wrap">
+  <header class="top">
+    <div class="tools">
+      <button id="helpBtn" class="icon-btn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="helpSheet" title="{{help_btn}}" aria-label="{{help_btn}}">?</button>
+      <button id="chronBtn" class="icon-btn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="chronSheet" title="{{chron_btn}}" aria-label="{{chron_btn}}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+      </button>
+      <button id="setBtn" class="icon-btn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="setSheet" title="{{set_title}}" aria-label="{{set_title}}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+      </button>
+      <button id="soundBtn" class="icon-btn" type="button" aria-pressed="false" aria-label="{{sound}}">♪</button>
+    </div>
+    <h1 class="logo">AI_Rulet</h1>
+    <p class="tagline">{{tagline}}</p>
+    <div class="divider" aria-hidden="true"><span></span>✦<span></span></div>
+  </header>
+
+  <main>
+    <section class="stage waiting" aria-hidden="true">
+      <div class="drum" id="drum"><div class="flare" id="flare"></div></div>
+      <div class="beacon" id="beacon"><i></i></div>
+    </section>
+
+    <div class="actions">
+      <button id="spinBtn" class="spin" type="button" disabled>{{find}}</button>
+      <p class="hint" id="hint">{{loading}}</p>
+    </div>
+
+    <article id="card" class="card" aria-live="polite">
+      <p class="empty">{{card_empty}}</p>
+    </article>
+
+  </main>
+
+  <footer id="footer"></footer>
+{{@langs}}</div>
+<div class="veil" id="veil"></div>
+<aside class="sheet" id="setSheet" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+  <div class="sheet-head"><h2 id="setTitle">{{set_title}}</h2><button class="x" type="button" aria-label="{{close}}">×</button></div>
+  <div class="row col"><span class="lbl">{{anim_label}}</span>
+    <div class="seg stack" data-key="anim">
+      <button type="button" data-v="stream">{{anim_stream}}</button>
+      <button type="button" data-v="decode">{{anim_decode}}</button>
+      <button type="button" data-v="const">{{anim_const}}</button>
+      <button type="button" data-v="deep">{{anim_deep}}</button>
+    </div>
+  </div>
+  <div class="row col"><span class="lbl">{{source}}</span>
+    <div class="seg" data-key="mode">
+      <button type="button" data-v="curated">{{src_curated}}</button><button type="button" data-v="mix">{{src_mix}}</button>
+    </div>
+  </div>
+  <div class="row col"><span class="lbl">{{areas}} — <button type="button" class="link" id="allCats">{{all}}</button> · <button type="button" class="link" id="noCats">{{none}}</button></span>
+    <div class="chips" id="chips"></div>
+  </div>
+</aside>
+<aside class="sheet" id="chronSheet" role="dialog" aria-modal="true" aria-label="{{chron_btn}}">
+  <div class="sheet-head">
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab" role="tab" data-tab="history" aria-selected="true">{{tab_history}}</button>
+      <button type="button" class="tab" role="tab" data-tab="favs" aria-selected="false">{{tab_favs}}</button>
+    </div>
+    <button class="x" type="button" aria-label="{{close}}">×</button>
+  </div>
+  <ul class="list" id="list"></ul>
+  <div class="list-tools" id="listTools"></div>
+</aside>
+<aside class="sheet" id="helpSheet" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="sheet-head"><h2 id="helpTitle">{{help_title}}</h2><button class="x" type="button" aria-label="{{close}}">×</button></div>
+  <div class="help">
+{{@help}}  </div>
+</aside>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+// Формат идеи: Название | Описание | Стек | Аномалия (усложнение) | три своих шага через ~
+// tail — два завершающих шага области, добавляются после шагов идеи
+/*@@LANG@@*//*@@STRINGS@@*/
+/*@@CATALOG@@*/
+
+/*@@MIX_SHARED@@*/
+
+/*@@MIX_TEXT@@*/
+
+</script>
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const u32 = new Uint32Array(1);
+const rand = n => { crypto.getRandomValues(u32); return u32[0] % n; };
+const pick = arr => arr[rand(arr.length)];
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const lcFirst = s => s.replace(/^\p{Lu}(?=\p{Ll})/u, c => c.toLowerCase());   // «Возвраты…» → «возвраты…», но LLM и AR остаются
+const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (m, k) => k in o ? o[k] : m);
+
+// ——— База идей ———
+// кто есть кто: код идеи каталога («rag.17») или номера «Микса»; у совсем старых карточек — область и название
+const keyOf = idea => idea.code || (Array.isArray(idea.mix) ? 'mix.' + idea.mix.join('.') : idea.cat + '::' + idea.title);
+const IDEAS = [], STEPS = new Map();   // траектория идеи каталога: три её шага + два завершающих шага области
+for (const c of CATEGORIES) {
+  c.list = c.ideas.trim().split('\n').map(l => l.trim()).filter(Boolean).map((l, k) => {
+    const [title, desc, stack, twist, own = ''] = l.split('|');
+    const idea = { title, desc, stack, twist, cat: c.id, code: c.id + '.' + (k + 1) };   // код не зависит от языка
+    STEPS.set(keyOf(idea), [...own.split('~').map(x => x.trim()).filter(Boolean), ...c.tail]);
+    return idea;
+  });
+  IDEAS.push(...c.list);
+  c.pool = (c.twists || '').trim().split('\n').map(l => l.trim()).filter(Boolean);   // общие аномалии области
+}
+const CAT = Object.fromEntries(CATEGORIES.map(c => [c.id, c]));
+const MIX_CAT = { id:'mix', name:T.mixName, ep:T.mixEp, glyph:'∞' };
+const catOf = idea => CAT[idea.cat] || MIX_CAT;
+const stepsOf = idea => STEPS.get(keyOf(idea)) || [];
+
+// «Микс»: общая структура и тексты языка собираются в объекты
+const DOMAINS = MIX_D.map(([id, tags, ptags], i) => {
+  const [name, who, why] = DOMAINS_TX[i];
+  return { id, tags: tags.split(' '), name, why, who: who.map((text, k) => {
+    // персона: данные, с которыми она работает (any — любые), и dev — ей уместны консольная утилита и API
+    const list = ptags[k].split(' '), data = list.filter(x => x !== 'dev' && x !== 'any');
+    return { text, data: data.length ? data.join(' ') : 'any', dev: list.includes('dev') };
+  }) };
+});
+const TECHNIQUES = MIX_T.map(([id, stack, needs], i) => { const [name, how, challenge, gives] = TECH_TX[i]; return { id, stack, needs, name, how, challenge, gives }; });
+const FORMATS = MIX_F.map(([id, tags, c = {}], i) => { const [name, add, sentence] = FORMATS_TX[i]; return { id, tags, c, name, add, sentence }; });
+const MIX_TWISTS = MIX_A.map(([id, tags, c = {}], i) => ({ id, tags, c, text: TWISTS_TX[i] }));
+
+// «Микс» сочетает только совместимое: технике нужны данные, которые в сфере действительно есть
+const fits = (t, d) => t.needs === 'any' || t.needs.split(' ').some(tag => d.tags.includes(tag));
+const MIX_TECHS = DOMAINS.map(d => TECHNIQUES.filter(t => fits(t, d)));
+const ruleOf = t => TECH_RULES[t.id] || {};
+// о каких данных идея: потребности техники, совпавшие с тегами сферы; у универсальной техники — основной тег сферы; llm — для языковых моделей
+const dataOf = (t, d) => {
+  const have = t.needs === 'any' ? [d.tags[0]] : t.needs.split(' ').filter(x => d.tags.includes(x));
+  return ruleOf(t).llm ? [...have, 'llm'] : have;
+};
+const fmtOk = (fi, wi, di) => !FORMATS[fi].c.dev || DOMAINS[di].who[wi].dev;
+const twistOk = (ai, fi) => !(MIX_TWISTS[ai].c.notF || []).includes(FORMATS[fi].id);
+const suits = (tags, have) => tags === 'any' || tags.split(' ').some(x => have.includes(x));
+// что можно сочетать для пары «сфера × техника»: форматы f, аномалии a, персоны w; null — техника здесь неуместна.
+// Списки сфер, техник и персон не фильтруются, а только сужают выбор — так номера в старых ссылках остаются верными
+const idx = arr => arr.map((x, i) => i);
+const MIX_OPTS = DOMAINS.map((d, di) => MIX_TECHS[di].map(t => {
+  const r = ruleOf(t), dn = d.id, have = dataOf(t, d), ban = r.ban || [];
+  if ((r.onlyIn && !r.onlyIn.includes(dn)) || (r.notIn || []).includes(dn)) return null;
+  const a = idx(MIX_TWISTS).filter(i => {
+    const { id, tags, c } = MIX_TWISTS[i];
+    // универсальной технике — только общие аномалии и аномалии языковых моделей: чужие данные ей не к месту
+    return (t.needs !== 'any' || tags === 'any' || tags === 'llm') && suits(tags, have) && !ban.includes(id) &&
+      (!c.tech || c.tech.includes(t.id)) && (!c.onlyIn || c.onlyIn.includes(dn)) && !(c.notIn || []).includes(dn);
+  });
+  const f = idx(FORMATS).filter(i => {
+    const { id, tags, c } = FORMATS[i];
+    return (!r.only || r.only.includes(id)) && suits(tags, have) && !ban.includes(id) && (!c.domain || d.tags.includes(c.domain)) &&
+      (!c.role || c.role === r.role) && a.some(ai => twistOk(ai, i));
+  });
+  // мета-техники (оценка, синтетика, дистилляция, активное обучение) нужны тем, кто сам строит модели
+  const w = idx(d.who).filter(i => suits(d.who[i].data, have) && (r.role !== 'meta' || d.who[i].dev) && f.some(fi => fmtOk(fi, i, di)));
+  return w.length ? { f, a, w } : null;
+}));
+// всего карточек «Микса»: сфера × техника × персона × что даёт × формат × аномалия × формулировка — только совместимые
+const MIX_COMBOS = MIX_OPTS.reduce((n, list, di) => n + list.reduce((m, o, ti) => !o ? m : m + MIX_TECHS[di][ti].gives.length *
+  o.w.reduce((k, wi) => k + o.f.filter(fi => fmtOk(fi, wi, di)).reduce((x, fi) => x + o.a.filter(ai => twistOk(ai, fi)).length, 0), 0), 0), 0) * MIX_PHRASES.length;
+let lastMix = { domain: '', tech: '' };
+
+function buildMix(fresh) {
+  // при настоящем броске сфера и техника не повторяют прошлый раз
+  let di, ti;
+  do di = rand(DOMAINS.length); while (fresh && DOMAINS[di].id === lastMix.domain);
+  const techs = MIX_TECHS[di], ok = idx(techs).filter(i => MIX_OPTS[di][i]);
+  do ti = pick(ok); while (fresh && ok.length > 1 && techs[ti].id === lastMix.tech);
+  if (fresh) lastMix = { domain: DOMAINS[di].id, tech: techs[ti].id };
+  const o = MIX_OPTS[di][ti], wi = pick(o.w), fi = pick(o.f.filter(i => fmtOk(i, wi, di)));
+  // аномалия: специфичная для данных техники — в двух случаях из трёх, общая — реже
+  const as = o.a.filter(i => twistOk(i, fi)), spec = as.filter(i => MIX_TWISTS[i].tags !== 'any');
+  return mixFrom(di, ti, wi, rand(techs[ti].gives.length), fi, spec.length && rand(3) ? pick(spec) : pick(as), rand(MIX_PHRASES.length));
+}
+const mergeStack = (a, b) => [...new Set([...a.split(','), ...b.split(',')].map(x => x.trim()))].join(', ');
+// «Микс» по номерам сферы, техники, персоны, фразы «что даёт», формата, аномалии и формулировки — их же хранит ссылка на идею.
+// Ссылки старого вида — только первые четыре номера — дают прежнюю карточку без формата и аномалии
+function mixFrom(di, ti, wi, pi, fi = -1, ai = -1, vi = 0) {
+  const t = MIX_TECHS[di][ti], d = DOMAINS[di], f = FORMATS[fi], a = MIX_TWISTS[ai];
+  const benefit = f ? t.gives[pi] : PROBLEMS[pi];   // у старых ссылок — общая фраза «что даёт», у новых — фраза самой техники
+  // абзац: почему важно в сфере → как работает → в каком виде → кому пригодится и что даёт → главный вызов
+  return {
+    title: fmt(T.mixTitle, { tech: cap(t.name), domain: d.name }),
+    desc: [d.why, t.how, f ? f.sentence : '', fmt(MIX_PHRASES[vi], { who: d.who[wi].text, pr: benefit, ch: t.challenge })].filter(Boolean).join(' '),
+    stack: f ? mergeStack(t.stack, f.add) : t.stack,
+    format: f ? f.name : undefined, twist: a ? a.text : undefined,
+    cat: 'mix', mix: f ? [di, ti, wi, pi, fi, ai, vi] : [di, ti, wi, pi]
+  };
+}
+// Короткий код идеи для ссылки и хранения: «rag.17» — область и номер идеи, «rag.17.5» — с пятой общей аномалией области,
+// «mix.12.3.4.40…» — номера частей «Микса». Код одинаков на всех языках
+const codeOf = idea => {
+  if (idea.cat === 'mix') return Array.isArray(idea.mix) ? 'mix.' + idea.mix.join('.') : null;
+  return idea.code ? idea.code + (idea.tw ? '.' + idea.tw : '') : null;
+};
+function ideaFromCode(code) {
+  const p = code.split('.'), n = p.slice(1).map(Number);
+  if (!n.length || !n.every(Number.isInteger)) return null;
+  if (p[0] === 'mix') {
+    const [di, ti, wi, pi, fi, ai, vi] = n;
+    if (!(DOMAINS[di] && MIX_TECHS[di][ti] && DOMAINS[di].who[wi] && PROBLEMS[pi])) return null;
+    if (n.length === 4) return mixFrom(di, ti, wi, pi);
+    const o = MIX_OPTS[di][ti];
+    return n.length === 7 && o && o.w.includes(wi) && MIX_TECHS[di][ti].gives[pi] && o.f.includes(fi) && fmtOk(fi, wi, di) &&
+      o.a.includes(ai) && twistOk(ai, fi) && MIX_PHRASES[vi] ? mixFrom(di, ti, wi, pi, fi, ai, vi) : null;
+  }
+  const c = Object.prototype.hasOwnProperty.call(CAT, p[0]) ? CAT[p[0]] : null, base = c && c.list[n[0] - 1];
+  if (!base || n.length > 2) return null;
+  if (n.length === 1) return base;
+  return n[1] >= 1 && n[1] <= c.pool.length ? withTwist(base, n[1]) : null;
+}
+
+// ——— Хранилище (может быть недоступно на file://) ———
+const KEY = 'si_rulet.v1';   // ключ от прежнего названия: при смене имени сохранённые хроника и колода не теряются
+const store = {
+  load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } },
+  save(d) { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} }
+};
+const saved = store.load();
+// Старые сохранения хранили карточки целиком и колоду по «области::названию» — переводим в коды.
+// Карточку, которую не узнать (например, после переименования идеи), оставляем как есть, чтобы не потерять избранное
+const LEGACY = new Map();
+for (const c of CATEGORIES) for (const i of c.list) LEGACY.set(c.id + '::' + i.title, i);
+function fromStored(x) {
+  if (typeof x === 'string') return ideaFromCode(x);
+  if (!x || typeof x !== 'object') return null;
+  if (x.cat === 'mix') return (Array.isArray(x.mix) && ideaFromCode('mix.' + x.mix.join('.'))) || x;
+  const base = LEGACY.get(x.cat + '::' + x.title);
+  return base ? (x.tw ? withTwist(base, x.tw) : base) : x;
+}
+const seenCode = k => k.includes('::') ? (LEGACY.get(k) || {}).code : k;
+const storedList = v => Array.isArray(v) ? v.map(fromStored).filter(Boolean) : [];
+// области, которых не было при прошлом сохранении, включаются сами — иначе новые области молча остались бы выключены.
+// В сохранениях до появления списка known были первые 32 области каталога
+function newCats(sv) {
+  const known = Array.isArray(sv.known) ? sv.known : CATEGORIES.slice(0, 32).map(c => c.id);
+  return CATEGORIES.map(c => c.id).filter(id => !known.includes(id));
+}
+const state = {
+  mode: saved.mode === 'mix' ? 'mix' : 'curated',
+  cats: new Set(Array.isArray(saved.cats) ? [...saved.cats.filter(id => CAT[id]), ...newCats(saved)] : CATEGORIES.map(c => c.id)),
+  history: storedList(saved.history),
+  favs: storedList(saved.favs),
+  seen: new Set(Array.isArray(saved.seen) ? saved.seen.map(seenCode).filter(Boolean) : []),   // уже выпадавшие идеи текущего круга
+  lastKey: typeof saved.lastKey === 'string' ? seenCode(saved.lastKey) || '' : '',
+  sound: saved.sound === true,
+  anim: ['stream', 'decode', 'const', 'deep'].includes(saved.anim) ? saved.anim : 'stream',
+  tab: 'history'
+};
+const persist = () => store.save({
+  mode: state.mode, cats: [...state.cats], known: CATEGORIES.map(c => c.id),
+  history: state.history.map(i => codeOf(i) || i), favs: state.favs.map(i => codeOf(i) || i),   // коды — карточка соберётся на языке страницы
+  seen: [...state.seen], lastKey: state.lastKey, sound: state.sound, anim: state.anim
+});
+
+let poolCache = null;
+const pool = () => poolCache || (poolCache = IDEAS.filter(i => state.cats.has(i.cat)));
+const canSpin = () => state.mode === 'mix' || pool().length > 0;
+// ячейки барабана — просто случайные идеи; результат броска — из колоды без повторов
+const fillerItem = () => state.mode === 'mix' ? buildMix() : (pool().length ? pick(pool()) : null);
+function drawIdea() {
+  if (state.mode === 'mix') return buildMix(true);
+  const p = pool();
+  if (!p.length) return null;
+  let fresh = p.filter(i => !state.seen.has(keyOf(i)));
+  if (!fresh.length) {   // круг пройден — начинаем новый, но не с только что выпавшей идеи
+    for (const i of p) state.seen.delete(keyOf(i));
+    fresh = p.length > 1 ? p.filter(i => keyOf(i) !== state.lastKey) : p;
+  }
+  const idea = pick(fresh);
+  state.seen.add(keyOf(idea));
+  state.lastKey = keyOf(idea);
+  return withTwist(idea);
+}
+// аномалия идеи каталога: в половине случаев своя, иначе одна из общих аномалий области (k — её номер с 1)
+function withTwist(idea, k) {
+  const pool = CAT[idea.cat].pool;
+  if (k === undefined) k = pool.length && rand(2) ? 1 + rand(pool.length) : 0;
+  return k ? { ...idea, twist: pool[k - 1], tw: k } : idea;
+}
+
+// ——— Поток идей: названия летят из глубины к зрителю и проносятся мимо; выпавшая встаёт в центр ———
+const drumEl = $('#drum'), flareEl = $('#flare'), beaconEl = $('#beacon'), stageEl = $('.stage');
+const streamEl = document.createElement('div');
+streamEl.className = 'anim stream';
+drumEl.appendChild(streamEl);
+const POOL = 10, AHEAD = 7, BEHIND = 2;   // видно от двух пролетевших до семи впереди
+const items = [];
+for (let k = 0; k < POOL; k++) {
+  const el = document.createElement('div');
+  el.className = 'item';
+  el.innerHTML = '<span class="c-cat"></span><span class="c-title"></span>';
+  el._i = null;
+  streamEl.appendChild(el);
+  items.push(el);
+}
+const reel = new Map();
+const itemAt = i => { if (!reel.has(i)) reel.set(i, fillerItem()); return reel.get(i); };
+let offset = 0, spinning = false, chosenIndex = null;
+let waiting = true;   // до первого броска в центре маяк, а не случайная идея
+
+function fill(el, item) {
+  const c = item ? catOf(item) : null;
+  el.firstChild.textContent = c ? c.glyph + '  ' + c.name : '';
+  el.lastChild.textContent = item ? item.title : '';
+}
+// у каждой идеи свой луч от точки схода: в основном вбок — мимо заголовка и кнопки
+function passDir(i) {
+  const h = Math.sin(i * 12.9898) * 43758.5453, f = h - Math.floor(h);
+  const an = (f - .5) * 1.1 + (i % 2 ? Math.PI : 0);
+  return [Math.cos(an), Math.sin(an) * .6];
+}
+function layout() {
+  const base = Math.floor(offset), focusI = Math.round(offset);
+  streamEl.classList.toggle('idle', !spinning);
+  for (let k = 0; k < POOL; k++) {
+    const i = base - BEHIND + k, el = items[k], d = i - offset;
+    // пустые позиции и ожидание первого броска — ничего не показываем
+    if (d > AHEAD || d < -1.4 || (waiting && !spinning) || !itemAt(i)) { el.style.visibility = 'hidden'; continue; }
+    el.style.visibility = '';
+    if (el._i !== i) { el._i = i; fill(el, itemAt(i)); }
+    const [dx, dy] = passDir(i);
+    let x, y, sc, op;
+    if (d >= 0) {   // впереди: маленькая и приглушённая на своём луче, к центру сходится только вблизи
+      const r = Math.min(d, 3) * 72;
+      sc = 1 / (1 + d * .9);
+      x = dx * r; y = dy * r;
+      op = d < .35 ? 1 : (1 - smooth(.35, AHEAD, d)) * .45;
+    } else {   // пролетает мимо: сразу уходит вбок, растёт и быстро тает
+      const p = -d, r = p * 380 + p * p * 200;
+      sc = 1 + p * 1.4;
+      x = dx * r; y = dy * r;
+      op = 1 - smooth(0, .7, p);
+    }
+    el.style.transform = `translate(-50%,-50%) translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0) scale(${sc.toFixed(3)})`;
+    el.style.opacity = Math.max(0, op).toFixed(3);
+    el.classList.toggle('soft', d > 2.2 || d < -.25);
+    el.style.zIndex = String(100 - Math.round(d * 10));   // ближние поверх дальних
+    const focus = !spinning && i === focusI;
+    el.classList.toggle('focus', focus);
+    el.classList.toggle('chosen', focus && i === chosenIndex);
+  }
+}
+// новые фильтры: поток собирается заново, но идея в центре — та, что в карточке, — остаётся
+function refillDrum() {
+  const keep = chosenIndex !== null ? reel.get(chosenIndex) : null;
+  reel.clear();
+  for (const el of items) el._i = null;
+  if (keep) reel.set(chosenIndex, keep); else chosenIndex = null;
+  layout();
+}
+// показать идею (например, открытую из «Хроники») в выбранной анимации, чтобы сцена и карточка совпадали
+function showIdea(idea) {
+  if (spinning) return;
+  leaveWaiting();
+  shownIdea = idea;
+  anim().show(idea);
+}
+function leaveWaiting() {
+  if (!waiting) return;
+  waiting = false;
+  beaconEl.classList.add('gone');
+  stageEl.classList.remove('waiting');
+}
+
+// Профиль скорости: быстрый разгон (~10%) и длинное торможение
+const CURVE = (() => {
+  const N = 300, P = new Float64Array(N + 1);
+  let s = 0;
+  for (let n = 1; n <= N; n++) {
+    const t = (n - 0.5) / N, r = Math.min(1, t / 0.1);
+    s += r * r * (3 - 2 * r) * Math.pow(1 - t, 2.4);
+    P[n] = s;
+  }
+  for (let n = 0; n <= N; n++) P[n] /= s;
+  return P;
+})();
+const curve = t => {
+  const x = t * 300, n = Math.floor(x);
+  return n >= 300 ? 1 : CURVE[n] + (CURVE[n + 1] - CURVE[n]) * (x - n);
+};
+const slope = t => (curve(Math.min(1, t + .01)) - curve(t)) / .01;   // скорость в момент t
+// моменты (с) n событий за dur секунд по той же кривой: частые в начале, редкие к концу
+function moments(n, dur) {
+  const out = [];
+  for (let i = 1, k = 1; i <= 300 && k <= n; i++)
+    while (k <= n && CURVE[i] * n >= k) { out.push(i / 300 * dur); k++; }
+  return out;
+}
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+const spinBtn = $('#spinBtn'), hint = $('#hint');
+// Бросок: идея из колоды, затем выбранная анимация; по её окончании — карточка
+function spin() {
+  if (spinning || !canSpin()) return;
+  const idea = drawIdea();
+  if (!idea) return;
+  spinning = true;
+  document.body.classList.add('spinning');
+  spinBtn.disabled = true;
+  syncReading();   // на время прыжка космос снова яркий
+  audio();   // звук запускается в обработчике клика или клавиши — иначе браузер его не разрешит
+  const first = waiting;
+  leaveWaiting();
+  const quick = reduceMotion.matches, dur = quick ? 600 : 2500 + rand(701);
+  anim().run(idea, dur, quick, first, () => { spinning = false; land(idea); });
+}
+function land(idea) {
+  document.body.classList.remove('spinning');
+  shownIdea = idea;
+  if (anim().flare) {   // вспышка в центре — у анимаций, где идея встаёт в центр
+    flareEl.classList.remove('pop');
+    void flareEl.offsetWidth;   // перезапуск анимации вспышки
+    flareEl.classList.add('pop');
+  }
+  updateSpinState();
+  updateFooter();
+  remember(idea);
+  renderCard(idea);
+  syncReading();
+}
+function remember(idea) {
+  state.history = [idea, ...state.history.filter(h => keyOf(h) !== keyOf(idea))].slice(0, 20);
+  persist();
+  if (state.tab === 'history') renderList();
+}
+// идея по ссылке «…#rag.17»: сразу в центре и в карточке; код из адреса убирается, чтобы перезагрузка вернула маяк
+function openShared() {
+  const code = decodeURIComponent(location.hash.slice(1));
+  if (!code || spinning) return;
+  window.history.replaceState(null, '', location.pathname + location.search);
+  const idea = ideaFromCode(code);
+  if (!idea) { toast(T.badLink); return; }
+  closeSheets(true);
+  showIdea(idea);
+  remember(idea);
+  renderCard(idea);
+  syncReading();
+}
+
+// ——— Карточка идеи ———
+const cardEl = $('#card');
+
+// Чтение: барабан почти скрылся при прокрутке, а карточка с идеей стоит в центре экрана —
+// фон слегка приглушается, полёт замедляется. Если видны и барабан, и карточка, фон не трогаем
+let drumHidden = false, cardCentered = false, reading = false, calm = 1;
+function syncReading() {
+  reading = drumHidden && cardCentered && !spinning && !!cardEl.querySelector('h2');
+  document.body.classList.toggle('reading', reading);
+}
+if ('IntersectionObserver' in window) {
+  new IntersectionObserver(([e]) => { drumHidden = e.intersectionRatio < 0.25; syncReading(); },
+    { threshold: [0, 0.25, 0.5, 1] }).observe($('.stage'));
+  // тонкая полоса посередине экрана: карточка «в центре», когда пересекает её
+  new IntersectionObserver(([e]) => { cardCentered = e.isIntersecting; syncReading(); },
+    { rootMargin: '-49% 0px -49% 0px' }).observe(cardEl);
+}
+const h = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const isFav = idea => state.favs.some(f => keyOf(f) === keyOf(idea));
+
+function renderCard(idea) {
+  const c = catOf(idea);
+  cardEl.textContent = '';
+  const meta = h('div', 'meta', c.glyph + '  ' + c.name + '  ');
+  meta.appendChild(h('em', null, '— ' + c.ep));
+  cardEl.append(meta, h('h2', null, idea.title), h('p', 'desc', idea.desc));
+
+  const tags = h('ul', 'tags'), stack = h('li');
+  stack.append(h('b', null, T.stack + ': '), document.createTextNode(idea.stack));
+  tags.appendChild(stack);
+  if (idea.format) { const f = h('li'); f.append(h('b', null, T.format + ': '), document.createTextNode(idea.format)); tags.appendChild(f); }
+  cardEl.appendChild(tags);
+
+  if (idea.cat !== 'mix') {   // у «Микса» вместо траектории — расширенное описание
+    cardEl.appendChild(h('h3', null, T.trajectory));
+    const ol = h('ol');
+    for (const s of stepsOf(idea)) ol.appendChild(h('li', null, s));
+    cardEl.appendChild(ol);
+  }
+  if (idea.twist) {
+    const trial = h('div', 'trial');
+    trial.append(h('b', null, T.anomaly), document.createTextNode(idea.twist));
+    cardEl.appendChild(trial);
+  }
+
+  const acts = h('div', 'card-actions');
+  const again = h('button', 'ghost', T.again); again.type = 'button'; again.onclick = spin;
+  const copy = h('button', 'ghost', T.copy); copy.type = 'button'; copy.onclick = () => copyText(toMd(idea));
+  const fav = h('button', 'ghost', isFav(idea) ? T.faved : T.fav); fav.type = 'button';
+  fav.onclick = () => { toggleFav(idea); fav.textContent = isFav(idea) ? T.faved : T.fav; };
+  const share = h('button', 'ghost', T.share); share.type = 'button'; share.onclick = () => shareIdea(idea);
+  acts.append(again, copy, fav, share);
+  cardEl.append(acts, askLinks(idea));
+
+  cardEl.classList.remove('show');
+  void cardEl.offsetWidth;
+  cardEl.classList.add('show');
+}
+// Разбор идеи во внешнем ИИ-сервисе: в запросе — сама идея и просьба её разобрать.
+// Ссылки с готовым запросом сервисы официально не описывают; форматы ChatGPT и Claude пользователь проверил вручную.
+// Google: udm=50 — режим ИИ на Gemini
+const ASK = {
+  google: { name: 'Google', hint: T.askGoogle, url: 'https://www.google.com/search?udm=50&q=' },
+  chatgpt: { name: 'ChatGPT', url: 'https://chat.openai.com/?q=' },   // без model — последняя доступная модель
+  claude: { name: 'Claude', url: 'https://claude.ai/new?q=' }
+};
+function askLinks(idea) {
+  const row = h('div', 'card-ask'), q = encodeURIComponent(askText(idea));
+  row.appendChild(h('span', null, T.askLabel));
+  for (const a of Object.values(ASK)) {
+    const l = h('a', 'ghost', '↗ ' + a.name);
+    l.href = a.url + q; l.target = '_blank'; l.rel = 'noopener noreferrer';
+    l.title = fmt(T.askTitle, { name: a.hint || a.name });
+    row.appendChild(l);
+  }
+  return row;
+}
+// ссылка на сам сайт с кодом идеи; из файла на диске — на опубликованную версию
+const SITE = /^https?:/.test(location.protocol) ? location.origin + location.pathname : PAGE_URL;
+function linkOf(idea) { const c = codeOf(idea); return SITE + (c ? '#' + c : ''); }
+function shareIdea(idea) {
+  const url = linkOf(idea);
+  // системное меню «Поделиться» — на телефоне; на компьютере ссылка просто копируется
+  if (navigator.share && matchMedia('(pointer: coarse)').matches)
+    navigator.share({ title: idea.title, text: fmt(T.shareText, { title: idea.title }), url }).catch(() => {});
+  else copyText(url, T.linkCopied);
+}
+function askText(idea) {
+  return fmt(T.askPrompt, { title: idea.title, desc: idea.desc, stack: idea.stack, twist: idea.twist ? fmt(T.askTwist, { twist: lcFirst(idea.twist) }) : '' });
+}
+function toMd(idea) {
+  const c = catOf(idea);
+  const head = `# ${idea.title}\n\n*${c.name}*\n\n${idea.desc}\n\n**${T.stack}:** ${idea.stack}\n` + (idea.format ? `**${T.format}:** ${idea.format}\n` : '');
+  const steps = idea.cat === 'mix' ? '' : `\n**${T.mdSteps}:**\n${stepsOf(idea).map((s, n) => `${n + 1}. ${s}`).join('\n')}\n`;
+  return head + steps + (idea.twist ? `\n**${T.anomaly}:** ${idea.twist}\n` : '');
+}
+
+// ——— Буфер обмена, тост ———
+const toastEl = $('#toast');
+let toastTimer;
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('on'), 1800);
+}
+function copyText(text, done = T.ideaCopied) {
+  const fallback = () => {
+    const ta = h('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    let ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+    ta.remove();
+    toast(ok ? done : T.copyFailed);
+  };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(() => toast(done), fallback);
+  else fallback();
+}
+
+// ——— Хроника и созвездие ———
+function toggleFav(idea) {
+  if (isFav(idea)) state.favs = state.favs.filter(f => keyOf(f) !== keyOf(idea));
+  else { state.favs = [idea, ...state.favs]; toast(T.favAdded); }
+  persist();
+  renderList();
+}
+const listEl = $('#list'), toolsEl = $('#listTools');
+function renderList() {
+  for (const t of document.querySelectorAll('.tab')) t.setAttribute('aria-selected', t.dataset.tab === state.tab);
+  const items = state.tab === 'history' ? state.history : state.favs;
+  listEl.textContent = '';
+  toolsEl.textContent = '';
+  if (!items.length) {
+    listEl.appendChild(h('li', 'list-empty', state.tab === 'history'
+      ? T.emptyHistory : T.emptyFavs));
+    return;
+  }
+  for (const idea of items) {
+    const li = h('li'), open = h('button', 'open'); open.type = 'button';
+    open.append(h('span', 'r', catOf(idea).glyph), h('span', 't', idea.title));
+    open.onclick = () => { closeSheets(true); showIdea(idea); renderCard(idea); cardEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    li.appendChild(open);
+    if (state.tab === 'favs') {
+      const del = h('button', 'del', '×'); del.type = 'button'; del.title = T.remove; del.setAttribute('aria-label', T.removeFav);
+      del.onclick = () => toggleFav(idea);
+      li.appendChild(del);
+    }
+    listEl.appendChild(li);
+  }
+  if (state.tab === 'history') {
+    const clr = h('button', 'link', T.clearHistory); clr.type = 'button';
+    clr.onclick = () => { state.history = []; persist(); renderList(); };
+    toolsEl.appendChild(clr);
+  } else {
+    const exp = h('button', 'link', T.exportMd); exp.type = 'button'; exp.onclick = exportMd;
+    toolsEl.appendChild(exp);
+  }
+}
+function exportMd() {
+  const md = '# ' + T.mdTitle + '\n\n' + state.favs.map(toMd).join('\n---\n\n');
+  const a = h('a');
+  a.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown;charset=utf-8' }));
+  a.download = T.mdFile;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+for (const t of document.querySelectorAll('.tab')) t.onclick = () => { state.tab = t.dataset.tab; renderList(); };
+
+// ——— Настройки ———
+const chipsEl = $('#chips');
+for (const c of CATEGORIES) {
+  const b = h('button', 'chip'); b.type = 'button'; b.dataset.id = c.id; b.title = c.ep;
+  b.append(h('span', null, c.glyph), document.createTextNode(c.name));
+  b.onclick = () => { state.cats.has(c.id) ? state.cats.delete(c.id) : state.cats.add(c.id); onFilters(); };
+  chipsEl.appendChild(b);
+}
+$('#allCats').onclick = () => { CATEGORIES.forEach(c => state.cats.add(c.id)); onFilters(); };
+$('#noCats').onclick = () => { state.cats.clear(); onFilters(); };
+for (const seg of document.querySelectorAll('.seg')) {
+  for (const b of seg.querySelectorAll('button')) b.onclick = () => {
+    if (seg.dataset.key === 'anim') { setAnim(b.dataset.v); return; }
+    state[seg.dataset.key] = b.dataset.v;
+    onFilters();
+  };
+}
+function syncControls() {
+  for (const seg of document.querySelectorAll('.seg'))
+    for (const b of seg.querySelectorAll('button')) b.setAttribute('aria-pressed', state[seg.dataset.key] === b.dataset.v);
+  for (const b of chipsEl.children) b.setAttribute('aria-pressed', state.cats.has(b.dataset.id));
+  chipsEl.classList.toggle('off', state.mode === 'mix');
+}
+function updateSpinState() {
+  const ok = canSpin();
+  spinBtn.disabled = spinning || !ok;
+  hint.textContent = ok ? T.hintKeys : T.hintEmpty;
+}
+function onFilters() {
+  poolCache = null;
+  persist();
+  syncControls();
+  if (!spinning && anim().refill) anim().refill();
+  updateSpinState();
+  updateFooter();
+}
+const combos = MIX_COMBOS;
+// склонение по числу: 1 идея, 2 идеи, 5 идей
+// форма слова по числу — по правилам языка страницы: 1 идея, 2 идеи, 5 идей; 1 idea, 2 ideas
+const PR = new Intl.PluralRules(LANG);
+const plural = (n, key) => { const f = T.pl[key]; return f[PR.select(n)] || f.other; };
+const num = n => n >= T.groupFrom ? n.toLocaleString(LANG) : String(n);
+const count = (n, key) => num(n) + '\u00a0' + plural(n, key);   // число не отрывается от слова
+function updateFooter() {
+  const p = pool(), left = p.filter(i => !state.seen.has(keyOf(i))).length;
+  $('#footer').textContent = fmt(T.footer, { ideas: count(IDEAS.length, 'idea'), left: num(left), total: num(p.length), combos: count(combos, 'combo') });
+}
+
+// ——— Звук: по умолчанию выключен; «звёздная капля», когда ячейка проходит линию выбора ———
+const soundBtn = $('#soundBtn');
+let actx = null, dry = null, space = null, noiseBuf = null, lastTick = -1;
+function audio() {
+  if (!state.sound) return null;
+  if (!actx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    actx = new AC();
+    const master = actx.createGain();
+    master.gain.value = 0.7;
+    master.connect(actx.createDynamicsCompressor()).connect(actx.destination);
+    // сухой путь: всё выше 2,4 кГц срезается — телефонные динамики выпячивают верха
+    dry = actx.createBiquadFilter();
+    dry.type = 'lowpass'; dry.frequency.value = 2400; dry.Q.value = 0.7;
+    dry.connect(master);
+    // «пространство»: короткое затухающее эхо, темнее сухого звука
+    space = actx.createDelay(1);
+    space.delayTime.value = 0.13;
+    const fb = actx.createGain(), tone = actx.createBiquadFilter();
+    fb.gain.value = 0.32; tone.type = 'lowpass'; tone.frequency.value = 1600;
+    space.connect(tone).connect(fb).connect(space);
+    tone.connect(master);
+    noiseBuf = actx.createBuffer(1, actx.sampleRate * 2, actx.sampleRate);   // шум для эфира, ветра и треска
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  if (actx.state === 'suspended') actx.resume();
+  return actx;
+}
+// тон с мягкой атакой: высота f0 → f1 за glide секунд, затухание decay; половина звука уходит в эхо
+function ping(t, f0, f1, glide, v, decay) {
+  const o = actx.createOscillator(), g = actx.createGain(), wet = actx.createGain();
+  o.frequency.setValueAtTime(f0, t);
+  o.frequency.exponentialRampToValueAtTime(f1, t + glide);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(v, t + 0.003);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.003 + decay);
+  wet.gain.value = 0.5;
+  o.connect(g); g.connect(dry); g.connect(wet).connect(space);
+  o.start(t); o.stop(t + decay + 0.05);
+}
+function tickSound() {
+  const a = audio();
+  if (!a) return;
+  const t = a.currentTime, gap = t - lastTick;
+  if (gap < 0.03) return;   // на самой высокой скорости щелчки не сливаются в треск
+  lastTick = t;
+  // чем медленнее барабан, тем ниже и отчётливее капля; лёгкий разброс высоты — без «пулемёта»
+  const slow = Math.min(1, Math.max(0, (gap - 0.04) / 0.2));
+  const f = (660 - 100 * slow) * (0.97 + Math.random() * 0.06), v = 0.06 + 0.03 * slow;
+  ping(t, f, f * 0.85, 0.05, v, 0.14);                     // основной тон с лёгким спадом высоты
+  ping(t, f * 1.5, f * 1.5 * 0.85, 0.05, v * 0.25, 0.09);  // тихая квинта
+}
+const live = () => state.sound && actx;
+const aNow = () => actx.currentTime;
+let lastEv = 0;
+const throttled = gap => { const t = aNow(); if (t - lastEv < gap) return false; lastEv = t; return true; };
+// тон: высота f0 → f1, мягкая атака, затухание; wet — доля в эхо; pan — сторона
+function tone(t, f0, f1, v, decay, { type = 'sine', wet = 0, glide = .05, attack = .004, pan = 0 } = {}) {
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = type; o.frequency.setValueAtTime(f0, t);
+  if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + glide);
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + attack); g.gain.exponentialRampToValueAtTime(.0001, t + attack + decay);
+  o.connect(g);
+  if (pan && actx.createStereoPanner) { const p = actx.createStereoPanner(); p.pan.value = pan; g.connect(p).connect(dry); }
+  else g.connect(dry);
+  if (wet) { const w = actx.createGain(); w.gain.value = wet; g.connect(w).connect(space); }
+  o.start(t); o.stop(t + attack + decay + .05);
+}
+// короткий шум через полосовой фильтр: треск, шорох
+function hiss(t, freq, q, v, decay) {
+  const n = actx.createBufferSource(), bp = actx.createBiquadFilter(), g = actx.createGain();
+  n.buffer = noiseBuf; bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = q;
+  g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + decay);
+  n.connect(bp).connect(g).connect(dry);
+  n.start(t, Math.random()); n.stop(t + decay + .02);
+}
+// постоянный шум с управляемой окраской: радиоэфир, ветер полёта
+function bed(freq, q, v) {
+  const t = aNow(), n = actx.createBufferSource(), bp = actx.createBiquadFilter(), g = actx.createGain();
+  n.buffer = noiseBuf; n.loop = true; bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = q;
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .2);
+  n.connect(bp).connect(g).connect(dry); n.start(t);
+  return { bp, g, stop(after) { const t2 = aNow(); g.gain.setTargetAtTime(.0001, t2, after / 4); n.stop(t2 + after + .1); } };
+}
+// Расшифровка: шипение эфира под помехами, треск на смене названия, писк прояснившейся буквы, сигнал «принято»
+const decodeSound = {
+  start() { if (audio()) this.air = bed(1900, .7, .045); },
+  static() { if (live() && throttled(.03)) hiss(aNow(), 1200 + Math.random() * 1400, 3, .07, .035); },
+  lock(p) {
+    if (!live()) return;
+    if (this.air) this.air.g.gain.setTargetAtTime(.004 + .04 * (1 - p), aNow(), .05);   // эфир стихает по мере приёма
+    if (throttled(.035)) tone(aNow(), 620 + 420 * p, 620 + 420 * p, .04, .035, { type: 'triangle' });
+  },
+  end() {
+    if (this.air) { this.air.stop(.4); this.air = null; }
+    if (!live()) return;
+    const t = aNow();
+    tone(t, 660, 660, .07, .5, { wet: .5 }); tone(t + .11, 990, 990, .06, .7, { wet: .5 });
+  }
+};
+// Созвездие: у каждой звезды своя нота — чем выше звезда, тем выше нота; в конце аккорд
+const SCALE = [392, 440, 523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66];
+const constellationSound = {
+  hop(f, slow) {
+    if (!live()) return;
+    const v = .05 + .03 * slow;
+    tone(aNow(), f, f, v, .22 + .35 * slow, { wet: .55 });
+    tone(aNow(), f * 2.76, f * 2.76, v * .15, .07, { wet: .3 });
+  },
+  end(f) {
+    if (!live()) return;
+    const t = aNow();
+    [1, 1.25, 1.5, 2].forEach((m, i) => tone(t + i * .08, f * m, f * m, .06, 1.3, { wet: .6 }));
+  }
+};
+// Полёт к звезде: ветер повторяет скорость; пролетающая звезда звучит своей нотой с эффектом Доплера
+// и с той стороны, где пролетела; в конце — низкий мягкий аккорд прибытия
+const deepSound = {
+  start() { if (audio()) this.air = bed(600, .8, .015); },
+  speed(sp) {
+    if (!this.air || !actx) return;
+    const t = aNow();
+    this.air.bp.frequency.setTargetAtTime(500 + sp * 1600, t, .06);
+    this.air.g.gain.setTargetAtTime(.006 + sp * .05, t, .06);
+  },
+  pass(f, pan, slow) { if (live()) tone(aNow(), f * 1.03, f * .97, .045 + .03 * slow, .3 + .4 * slow, { wet: .6, glide: .3, pan }); },
+  end(f) {
+    if (this.air) { this.air.stop(.5); this.air = null; }
+    if (!live()) return;
+    const t = aNow();
+    [.5, .75, 1, 1.5].forEach((m, i) => tone(t + i * .07, f * m, f * m, .055, 1.8, { wet: .6, attack: .08 }));
+    tone(t + .3, f * 3, f * 3, .015, .9, { wet: .7 });
+  }
+};
+
+// ——— Анимации поиска. Общий набор действий у всех: run — бросок, show — показать готовую идею,
+//     mount — собрать сцену под текущий размер, refill — пересобрать поток после смены фильтров ———
+const catLine = idea => { const c = catOf(idea); return c.glyph + '  ' + c.name; };
+// «Поток идей» — названия летят из глубины навстречу
+const stream = {
+  el: streamEl, flare: true,
+  run(idea, dur, quick, first, done) {
+    const start = offset, base = Math.round(start);
+    const target = base + (quick ? 6 : 44 + rand(15));
+    for (const k of [...reel.keys()]) if (k > base + AHEAD + 1 || k < base - BEHIND - 2) reel.delete(k);
+    if (first) reel.set(base, null);   // первый бросок: в центре пусто — первая идея прилетит из глубины
+    reel.set(target, idea);
+    chosenIndex = target;
+    let tickCell = Math.round(start);
+    const dist = target - start, t0 = performance.now();
+    const frame = now => {
+      // метка кадра бывает чуть раньше момента нажатия — время не должно уйти в минус
+      const t = Math.max(0, Math.min(1, (now - t0) / dur));
+      const p = quick ? 1 - Math.pow(1 - t, 3) : curve(t);
+      // лёгкий «довод»: идея чуть пролетает центр и возвращается
+      const bump = !quick && t > 0.8 ? 0.14 * Math.pow(Math.sin(Math.PI * (t - 0.8) / 0.2), 2) : 0;
+      offset = start + dist * p + bump;
+      if (Math.round(offset) !== tickCell) { tickCell = Math.round(offset); tickSound(); }
+      if (t < 1) { layout(); requestAnimationFrame(frame); }
+      else { offset = target; done(); layout(); }
+    };
+    requestAnimationFrame(frame);
+  },
+  show(idea) {
+    const i = Math.round(offset);
+    reel.set(i, idea);
+    chosenIndex = i;
+    for (const el of items) if (el._i === i) el._i = null;
+    layout();
+  },
+  refill() { refillDrum(); }
+};
+
+// «Расшифровка сигнала» — названия сменяются всё реже сквозь помехи, последнее проясняется
+const NOISE = T.noise;
+const noisy = (txt, share) => [...txt].map(ch => ch === ' ' || Math.random() > share ? ch : NOISE[Math.floor(Math.random() * NOISE.length)]).join('');
+const decode = {
+  flare: true,
+  mount() {
+    if (this.el) return;
+    this.el = h('div', 'anim dec');
+    this.cat = h('div', 'cat'); this.ttl = h('div', 'ttl');
+    this.el.append(this.cat, this.ttl);
+    drumEl.appendChild(this.el);
+  },
+  run(idea, ms, quick, first, done) {
+    this.mount();
+    // одно непрерывное торможение; последняя смена приносит нужную идею, её буквы проясняются вразнобой
+    const dur = ms / 1000, { el, cat, ttl } = this, settle = Math.min(.45, dur * .15), run = dur - settle;
+    const switches = moments(quick ? 4 : 26, run), t0 = performance.now();
+    let si = 0, shown = fillerItem() || idea, share = .5, lastNoise = 0, mask = [], cleared = 0, total = 0;
+    el.classList.remove('done');
+    decodeSound.start();
+    const frame = now => {
+      const e = Math.max(0, (now - t0) / 1000);
+      if (si < switches.length) {
+        while (si < switches.length && e >= switches[si]) {
+          si++;
+          shown = si === switches.length ? idea : (fillerItem() || idea);
+          share = .55 * (1 - si / switches.length) + .2;   // чем медленнее смены, тем меньше помех
+          decodeSound.static();
+        }
+        if (si < switches.length) {
+          if (now - lastNoise > 45) { lastNoise = now; cat.textContent = noisy(catLine(shown), share); ttl.textContent = noisy(shown.title, share); }
+        } else {   // пришла нужная идея: запоминаем, какие буквы ещё искажены
+          mask = [...idea.title].map(ch => ch !== ' ' && Math.random() < share);
+          total = mask.filter(Boolean).length;
+          cat.textContent = catLine(idea);
+        }
+      } else {   // фокусировка: искажённые буквы проясняются в случайном порядке
+        const want = Math.round(Math.min(1, (e - run) / settle) * total);
+        while (cleared < want) {
+          const left = mask.map((m, i) => m ? i : -1).filter(i => i >= 0);
+          if (!left.length) break;
+          mask[left[Math.floor(Math.random() * left.length)]] = false;
+          cleared++;
+          decodeSound.lock(cleared / Math.max(1, total));
+        }
+        if (now - lastNoise > 45) {
+          lastNoise = now;
+          ttl.textContent = '';
+          [...idea.title].forEach((ch, i) => ttl.appendChild(mask[i] ? h('span', 'n', noisy(ch, 1)) : document.createTextNode(ch)));
+        }
+      }
+      if (e < dur) requestAnimationFrame(frame);
+      else { this.show(idea); decodeSound.end(); done(); }
+    };
+    requestAnimationFrame(frame);
+  },
+  show(idea) {
+    this.mount();
+    this.cat.textContent = catLine(idea);
+    this.ttl.textContent = idea.title;
+    this.el.classList.add('done');
+  }
+};
+
+// «Созвездие» — огонёк прыгает между звёздами-идеями, как шарик рулетки, и замирает на одной
+const constel = {
+  flare: false,
+  // force — новое созвездие, даже если размер сцены не менялся
+  mount(force) {
+    const W = drumEl.clientWidth, H = drumEl.clientHeight;
+    if (this.el && this.W === W && this.H === H && !force) return;
+    if (this.el) this.el.remove();
+    this.W = W; this.H = H;
+    this.left = 3 + rand(3);   // сколько бросков проживёт это созвездие: от 3 до 5
+    const pts = [];
+    for (let tries = 0; pts.length < 9 && tries < 600; tries++) {   // звёзды — в видимой зоне, над названием
+      const p = { x: W * (.16 + Math.random() * .68), y: H * (.17 + Math.random() * .38) };
+      if (pts.every(q => Math.hypot(q.x - p.x, q.y - p.y) > Math.min(W, H) * .19)) pts.push(p);
+    }
+    const links = new Set();
+    pts.forEach((p, i) => pts.map((q, j) => [j, Math.hypot(q.x - p.x, q.y - p.y)]).filter(([j]) => j !== i).sort((a, b) => a[1] - b[1]).slice(0, 2)
+      .forEach(([j]) => links.add(i < j ? i + '-' + j : j + '-' + i)));
+    this.nb = pts.map(() => []);
+    this.el = h('div', 'anim const');
+    if (anim() === this) this.el.classList.add('on');   // небо сменилось посреди работы — новое созвездие сразу видно
+    const ns = 'http://www.w3.org/2000/svg', svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('class', 'links');
+    for (const l of links) {
+      const [a, b] = l.split('-').map(Number);
+      this.nb[a].push(b); this.nb[b].push(a);
+      const ln = document.createElementNS(ns, 'line');
+      Object.entries({ x1: pts[a].x, y1: pts[a].y, x2: pts[b].x, y2: pts[b].y, stroke: 'rgba(170,196,255,.25)', 'stroke-width': 1 }).forEach(([k, v]) => ln.setAttribute(k, v));
+      svg.appendChild(ln);
+    }
+    this.el.appendChild(svg);
+    this.pts = pts;
+    this.stars = pts.map(p => { const s = h('div', 'st'); s.style.left = p.x + 'px'; s.style.top = p.y + 'px'; this.el.appendChild(s); return s; });
+    this.lbls = pts.map(p => { const l = h('div', 'slbl'); l.style.left = p.x + 'px'; l.style.top = p.y + 'px'; this.el.appendChild(l); return l; });
+    this.ptr = h('div', 'ptr'); this.el.appendChild(this.ptr);
+    this.won = h('div', 'won'); this.el.appendChild(this.won);
+    // своя нота у каждой звезды: чем выше звезда, тем выше нота
+    const order = pts.map((p, i) => i).sort((a, b) => pts[b].y - pts[a].y);
+    this.note = [];
+    order.forEach((i, r) => { this.note[i] = SCALE[Math.min(SCALE.length - 1, r)]; });
+    drumEl.appendChild(this.el);
+    this.moveTo(0, 0);
+  },
+  moveTo(i, sec) {
+    this.ptr.style.transitionDuration = sec + 's';
+    this.ptr.style.left = this.pts[i].x + 'px'; this.ptr.style.top = this.pts[i].y + 'px';
+    this.at = i;
+  },
+  showWon(idea) {
+    this.won.textContent = '';
+    this.won.append(h('small', null, catLine(idea)), document.createTextNode(idea.title));
+    this.won.classList.add('show');
+  },
+  run(idea, ms, quick, first, done) {
+    this.mount(this.left <= 0);   // срок созвездия вышел — перед броском небо меняется
+    this.left--;
+    const { stars, lbls } = this, dur = ms / 1000 - .3;   // последние 0,3 с — финальный прыжок к выбранной звезде
+    stars.forEach(s => s.classList.remove('win', 'hit'));
+    this.ptr.classList.remove('off');
+    this.won.classList.remove('show');
+    lbls.forEach(l => { const it = fillerItem(); l.textContent = it ? it.title : ''; });
+    let f;
+    do f = Math.floor(Math.random() * stars.length); while (f === this.at && stars.length > 1);
+    lbls[f].textContent = idea.title;
+    const hops = moments(quick ? 4 : 24, dur), t0 = performance.now();
+    let k = 0;
+    const frame = now => {
+      const e = Math.max(0, (now - t0) / 1000);
+      while (k < hops.length && e >= hops[k]) {
+        // путь по линиям созвездия; последний прыжок — к выбранной звезде
+        const next = k === hops.length - 1 ? f : pick(this.nb[this.at].length ? this.nb[this.at] : [0]);
+        const gap = k + 1 < hops.length ? hops[k + 1] - hops[k] : .3;
+        this.moveTo(next, Math.min(.28, gap * .8));
+        lbls.forEach(l => l.classList.remove('on'));
+        lbls[next].classList.add('on');
+        stars[next].classList.add('hit');
+        setTimeout(() => stars[next].classList.remove('hit'), 180);
+        constellationSound.hop(this.note[next], Math.min(1, Math.max(0, (gap - .05) / .2)));
+        k++;
+      }
+      if (e < dur + .3) requestAnimationFrame(frame);
+      else {
+        lbls.forEach(l => l.classList.remove('on'));
+        stars[f].classList.add('win');
+        this.ptr.classList.add('off');
+        this.showWon(idea);
+        constellationSound.end(this.note[f]);
+        done();
+      }
+    };
+    requestAnimationFrame(frame);
+  },
+  show(idea) {
+    this.mount();
+    this.stars.forEach((s, i) => s.classList.toggle('win', i === this.at));
+    this.ptr.classList.add('off');
+    this.lbls.forEach(l => l.classList.remove('on'));
+    this.showWon(idea);
+  }
+};
+
+// «Полёт к звезде» — камера летит вглубь созвездия от звезды к звезде и тормозит у выбранной
+const glowSprite = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.12, 'rgba(225,235,255,.9)');
+  gr.addColorStop(.35, 'rgba(170,200,255,.35)'); gr.addColorStop(1, 'rgba(170,200,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  return c;
+})();
+const deep = {
+  flare: true,
+  M: 22, GAP: 3.2, D: 2.2,   // звёзд в цепочке, расстояние между ними вглубь, дистанция остановки
+  mount() {
+    const W = drumEl.clientWidth, H = drumEl.clientHeight;
+    if (this.el && this.W === W && this.H === H) return;
+    if (this.el) this.el.remove();
+    this.W = W; this.H = H; this.F = Math.min(W, H) * .9;
+    this.el = h('div', 'anim deep');
+    this.cv = h('canvas'); this.won = h('div', 'won');
+    this.el.append(this.cv, this.won);
+    const d = Math.min(2, window.devicePixelRatio || 1);
+    this.cv.width = W * d; this.cv.height = H * d;
+    this.g = this.cv.getContext('2d'); this.g.setTransform(d, 0, 0, d, 0, 0);
+    drumEl.appendChild(this.el);
+    this.build(fillerItem() || IDEAS[0]); this.prev = null;
+    this.draw(0, false);
+  },
+  build(final) {
+    const st = [];
+    let x = 0, y = 0;
+    for (let k = 0; k < this.M; k++) {   // цепочка звёзд петляет и уходит вглубь; последняя — выбранная идея
+      x = Math.max(-2.2, Math.min(2.2, x + (Math.random() - .5) * 1.8));
+      y = Math.max(-1.3, Math.min(1.3, y + (Math.random() - .5) * 1.2));
+      st.push({ x, y, z: 4 + k * this.GAP, idea: k === this.M - 1 ? final : (fillerItem() || final) });
+    }
+    st.forEach(p => { p.note = SCALE[Math.round((1 - (p.y + 1.3) / 2.6) * (SCALE.length - 1))]; });   // выше — выше нота
+    this.links = [];
+    for (let k = 0; k + 1 < this.M; k++) { this.links.push([k, k + 1]); if (k + 2 < this.M && Math.random() < .3) this.links.push([k, k + 2]); }
+    this.st = st;
+    const zMax = st[this.M - 1].z + 6;
+    this.dust = Array.from({ length: 260 }, () => ({ x: (Math.random() - .5) * 16, y: (Math.random() - .5) * 10, z: Math.random() * zMax, a: .2 + Math.random() * .6 }));
+  },
+  // камера за D единиц до звезды u; со сдвигом вбок — звёзды пролетают рядом, у финиша — точно по центру
+  cam(u) {
+    const k = Math.min(this.M - 1, Math.floor(u)), f = u - k, a = this.st[k], b = this.st[Math.min(this.M - 1, k + 1)];
+    const e = f * f * (3 - 2 * f), side = (1 - smooth(this.M - 3, this.M - 1, u)) * .55;
+    return { x: a.x + (b.x - a.x) * e + side * Math.sin(u * 1.7), y: a.y + (b.y - a.y) * e + side * .6 * Math.cos(u * 1.3), z: a.z + (b.z - a.z) * f - this.D };
+  },
+  proj(p, c) {
+    const dz = p.z - c.z;
+    if (dz < .12) return null;
+    const k = this.F / dz;
+    return { x: this.W / 2 + (p.x - c.x) * k, y: this.H / 2 + (p.y - c.y) * k, k, dz };
+  },
+  draw(u, final) {
+    const g = this.g, c = this.cam(u), pc = this.prev || c;
+    g.clearRect(0, 0, this.W, this.H);
+    g.lineCap = 'round';
+    for (const d of this.dust) {   // звёздная пыль — штрихи от прошлого кадра: на скорости длинные
+      const a = this.proj(d, c), b = this.proj(d, pc);
+      if (!a) continue;
+      g.strokeStyle = `rgba(210,222,255,${(d.a * smooth(40, 8, a.dz)).toFixed(3)})`;
+      g.lineWidth = Math.max(.6, .02 * a.k);
+      g.beginPath(); g.moveTo(b ? b.x : a.x, b ? b.y : a.y); g.lineTo(a.x + .01, a.y); g.stroke();
+    }
+    g.lineWidth = 1;
+    for (const [i, j] of this.links) {   // линии созвездия
+      const a = this.proj(this.st[i], c), b = this.proj(this.st[j], c);
+      if (!a || !b) continue;
+      g.strokeStyle = `rgba(170,196,255,${(.3 * smooth(45, 10, Math.max(a.dz, b.dz)) * smooth(.3, 1.2, Math.min(a.dz, b.dz))).toFixed(3)})`;
+      g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke();
+    }
+    const next = Math.min(this.M - 1, Math.floor(u) + 1), last = this.M - 1;
+    this.st.forEach((p, i) => {   // звёзды-идеи: вдали точки, вблизи светила
+      const a = this.proj(p, c);
+      if (!a) return;
+      // размер ограничен, а у самой камеры звезда гаснет — иначе свечение раздувается в огромное пятно
+      const r = Math.min(26, Math.max(1.2, .07 * a.k)) * (final && i === last ? 1.6 : 1);
+      g.globalAlpha = smooth(48, 12, a.dz) * smooth(.5, 1.5, a.dz);
+      g.drawImage(glowSprite, a.x - r * 4, a.y - r * 4, r * 8, r * 8);
+      g.globalAlpha = 1;
+      if (final && i === last) {   // выбранная звезда: лучи
+        g.strokeStyle = 'rgba(225,235,255,.5)';
+        for (const [dx, dy] of [[1, 0], [0, 1]]) { g.beginPath(); g.moveTo(a.x - dx * r * 5, a.y - dy * r * 5); g.lineTo(a.x + dx * r * 5, a.y + dy * r * 5); g.stroke(); }
+      }
+      if (!final && i === next && a.dz < 7) {   // название звезды, к которой подлетаем
+        g.font = `${Math.round(12 + Math.min(8, .04 * a.k))}px ${SERIF}`;
+        g.textAlign = 'center';
+        g.fillStyle = `rgba(205,215,240,${(smooth(7, 3, a.dz) * .9).toFixed(3)})`;
+        g.fillText(p.idea.title, a.x, a.y + r * 3 + 14);
+      }
+    });
+  },
+  showWon(idea) {
+    this.won.textContent = '';
+    this.won.append(h('small', null, catLine(idea)), document.createTextNode(idea.title));
+    this.won.classList.add('show');
+  },
+  run(idea, ms, quick, first, done) {
+    this.mount();
+    this.won.classList.remove('show');
+    this.build(idea); this.prev = null;
+    const dur = ms / 1000;
+    let maxS = 0, passed = 0;
+    for (let t = 0; t < 1; t += .01) maxS = Math.max(maxS, slope(t));
+    const t0 = performance.now();
+    deepSound.start();
+    const frame = now => {
+      const t = Math.max(0, Math.min(1, (now - t0) / 1000 / dur)), u = (this.M - 1) * curve(t), sp = slope(t) / maxS;
+      this.draw(u, false);
+      this.prev = this.cam(u);
+      deepSound.speed(sp);
+      while (passed < this.M - 1 && u >= passed + .5) {   // звезда проносится мимо камеры
+        const p = this.st[passed];
+        deepSound.pass(p.note, Math.max(-1, Math.min(1, (p.x - this.prev.x) / 2)), 1 - sp);
+        passed++;
+      }
+      if (t < 1) requestAnimationFrame(frame);
+      else { this.show(idea); deepSound.end(this.st[this.M - 1].note); done(); }
+    };
+    requestAnimationFrame(frame);
+  },
+  show(idea) {
+    this.mount();
+    if (this.st[this.M - 1].idea !== idea) this.build(idea);
+    this.prev = null;
+    this.draw(this.M - 1, true);
+    this.showWon(idea);
+  }
+};
+
+const ANIMS = { stream, decode, const: constel, deep };
+const anim = () => ANIMS[state.anim];
+let shownIdea = null;   // идея, которая сейчас на сцене и в карточке
+// показать выбранную анимацию: собрать её сцену, спрятать остальные, перенести на неё текущую идею
+function activate() {
+  const a = anim();
+  if (a.mount) a.mount();
+  for (const k in ANIMS) if (ANIMS[k].el) ANIMS[k].el.classList.toggle('on', ANIMS[k] === a);
+  if (!waiting && shownIdea) a.show(shownIdea);
+  else if (a === stream) layout();
+}
+function setAnim(v) {
+  if (spinning || !ANIMS[v] || v === state.anim) return;
+  state.anim = v;
+  persist();
+  syncControls();
+  if (ANIMS[v] === constel && constel.el) constel.mount(true);   // при каждом переходе к «Созвездию» — новое небо
+  activate();
+}
+
+// ——— Выдвижные панели: параметры пространства и хроника ———
+const veil = $('#veil'), sheets = { set: $('#setSheet'), chron: $('#chronSheet'), help: $('#helpSheet') };
+const sheetBtns = { set: $('#setBtn'), chron: $('#chronBtn'), help: $('#helpBtn') };
+let openSheet = null;
+const wrapEl = $('.wrap');   // пока открыта панель, страница под ней недоступна для фокуса и экранного диктора
+function showSheet(name) {
+  if (openSheet === name) { closeSheets(); return; }
+  closeSheets(true);
+  openSheet = name;
+  wrapEl.inert = true;
+  if (name === 'chron') renderList();
+  sheets[name].classList.add('open');
+  veil.classList.add('on');
+  sheetBtns[name].setAttribute('aria-expanded', 'true');
+  setTimeout(() => sheets[name].querySelector('.x').focus(), 60);
+}
+function closeSheets(silent) {
+  if (!openSheet) return;
+  const name = openSheet;
+  openSheet = null;
+  sheets[name].classList.remove('open');
+  veil.classList.remove('on');
+  sheetBtns[name].setAttribute('aria-expanded', 'false');
+  wrapEl.inert = false;
+  if (!silent) sheetBtns[name].focus();
+}
+for (const name in sheetBtns) sheetBtns[name].onclick = () => showSheet(name);
+// числа в справке — из самих данных, чтобы не расходились с каталогом
+const HELP_N = { ideas: IDEAS.length, cats: CATEGORIES.length, combos };
+for (const el of document.querySelectorAll('.help [data-n]')) {
+  el.textContent = count(HELP_N[el.dataset.n], el.dataset.pl);
+}
+veil.onclick = () => closeSheets();
+for (const x of document.querySelectorAll('.sheet .x')) x.onclick = () => closeSheets();
+
+function syncSound() {
+  soundBtn.setAttribute('aria-pressed', state.sound);
+  soundBtn.title = state.sound ? T.soundOn : T.soundOff;
+}
+soundBtn.onclick = () => {
+  state.sound = !state.sound;
+  syncSound();
+  persist();
+  if (state.sound) tickSound();   // один щелчок — подтверждение, что звук работает
+  else if (actx) actx.suspend();
+};
+
+// ——— Глубокий космос ———
+// Дальний план (звёзды, Млечный Путь, галактики) почти неподвижен и рисуется один раз.
+// Средний план — слои туманности: летят из точки за барабаном, проходят сквозь экран и появляются вновь.
+const skyWrap = $('#skyWrap'), skyEl = $('#sky'), sctx = skyEl.getContext('2d'), nebWrap = $('#neb');
+const OVER = 1.16;   // запас под медленный дрейф неба (см. .sky canvas)
+const SKY_SEED = crypto.getRandomValues(new Uint32Array(1))[0];   // каждое открытие — новый участок неба
+const FLY_T = 70;    // секунд на пролёт одного слоя туманности
+const NEB_PAL = [    // [основной, второй, горячие сгустки]
+  [[72, 46, 168], [28, 120, 178], [205, 84, 182]],
+  [[48, 58, 165], [110, 52, 175], [80, 170, 215]],
+  [[36, 44, 130], [34, 140, 165], [170, 110, 225]],
+  [[96, 42, 150], [58, 86, 190], [225, 105, 160]]
+];
+let sky = null, skyAspect = 1, skyTimer = 0, skyGen = 0;
+let nebTex = [], layers = [], LW = 0, LH = 0;
+
+// Перлин-шум с детерминированным генератором (mulberry32)
+function makeNoise(seed) {
+  let t = seed >>> 0;
+  const rnd = () => {
+    t = (t + 0x6D2B79F5) >>> 0;
+    let r = Math.imul(t ^ t >>> 15, 1 | t);
+    r ^= r + Math.imul(r ^ r >>> 7, 61 | r);
+    return ((r ^ r >>> 14) >>> 0) / 4294967296;
+  };
+  const perm = Array.from({ length: 256 }, (_, i) => i);
+  for (let i = 255; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [perm[i], perm[j]] = [perm[j], perm[i]]; }
+  const p = new Uint8Array(512), gx = new Float32Array(256), gy = new Float32Array(256);
+  for (let i = 0; i < 512; i++) p[i] = perm[i & 255];
+  for (let i = 0; i < 256; i++) { const a = rnd() * Math.PI * 2; gx[i] = Math.cos(a); gy[i] = Math.sin(a); }
+  const fade = x => x * x * x * (x * (x * 6 - 15) + 10);
+  const noise = (x, y) => {
+    const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi, X = xi & 255, Y = yi & 255;
+    const h00 = p[p[X] + Y], h10 = p[p[X + 1] + Y], h01 = p[p[X] + Y + 1], h11 = p[p[X + 1] + Y + 1];
+    const u = fade(xf), v = fade(yf);
+    const a = gx[h00] * xf + gy[h00] * yf, b = gx[h10] * (xf - 1) + gy[h10] * yf;
+    const c = gx[h01] * xf + gy[h01] * (yf - 1), d = gx[h11] * (xf - 1) + gy[h11] * (yf - 1);
+    const ab = a + u * (b - a);
+    return ab + v * (c + u * (d - c) - ab);
+  };
+  const fbm = (x, y, oct) => {
+    let sum = 0, amp = 0.5, f = 1;
+    for (let i = 0; i < oct; i++) { sum += amp * noise(x * f, y * f); f *= 2.03; amp *= 0.5; }
+    return sum;
+  };
+  return { rnd, fbm };
+}
+const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+const mix = (a, b, t) => a + (b - a) * t;
+
+const yieldFrame = () => new Promise(res => setTimeout(res));
+
+// Дальний план: свечение Млечного Пути, пылевые прожилки и слабая дымка по всему небу
+async function makeFar(N, nw, nh, aspect, bandAt, gen) {
+  const c = document.createElement('canvas');
+  c.width = nw; c.height = nh;
+  const cc = c.getContext('2d'), img = cc.createImageData(nw, nh), px = img.data, sc = 2.1;
+  for (let j = 0; j < nh; j++) {
+    const y = j / nh;
+    for (let i = 0; i < nw; i++) {
+      const x = i / nw * aspect, nx = x * sc, ny = y * sc;
+      const band = bandAt(x, y), haze = N.fbm(nx + 3.3, ny + 1.1, 5);
+      const dust = smooth(0, 0.4, N.fbm(nx * 2.1 + 13.1, ny * 2.1 + 3.7, 4)) * (0.3 + 0.7 * band);
+      const dens = (band * (0.45 + 0.55 * smooth(-0.3, 0.4, haze)) * 0.7 + smooth(0, 0.6, haze) * 0.22) * (1 - 0.85 * dust);
+      const t = smooth(-0.4, 0.4, haze), core = band * band * band * 0.6;
+      const R = mix(mix(70, 40, t), 236, core), G = mix(mix(52, 96, t), 218, core), B = mix(mix(150, 170, t), 255, core);
+      const lum = 0.55 + 0.9 * dens, o = (j * nw + i) * 4, dz = Math.random() * 3 - 1.5;   // dz — дизеринг против полос
+      px[o] = R * lum + dz; px[o + 1] = G * lum + dz; px[o + 2] = B * lum + dz;
+      px[o + 3] = Math.min(1, dens) * 150 + Math.random() * 2;
+    }
+    if (j % 32 === 31) { await yieldFrame(); if (gen !== skyGen) return null; }
+  }
+  cc.putImageData(img, 0, 0);
+  return c;
+}
+
+// Облако туманности: fBm с искажением координат, края растворяются — у слоя нет видимых границ
+async function makeCloud(seed, nw, nh, aspect, pal, gen) {
+  const N = makeNoise(seed), [A, B, Hc] = pal;
+  const c = document.createElement('canvas');
+  c.width = nw; c.height = nh;
+  const cc = c.getContext('2d'), img = cc.createImageData(nw, nh), px = img.data, sc = 2.1;
+  for (let j = 0; j < nh; j++) {
+    const y = j / nh, ey = (y - .5) * 2;
+    for (let i = 0; i < nw; i++) {
+      const x = i / nw * aspect, nx = x * sc, ny = y * sc, ex = (i / nw - .5) * 2;
+      const qx = N.fbm(nx + 1.7, ny + 9.2, 4), qy = N.fbm(nx + 8.3, ny + 2.8, 4);
+      const r = N.fbm(nx + 2.6 * qx + 4.1, ny + 2.6 * qy + 7.3, 5);
+      const dust = smooth(0.05, 0.45, N.fbm(nx * 2.1 + 13.1, ny * 2.1 + 3.7, 4));
+      const edge = 1 - smooth(0.55, 1, Math.hypot(ex, ey));
+      const dens = smooth(-0.08, 0.5, r) * (1 - 0.7 * dust) * edge;
+      const t = smooth(-0.35, 0.35, qx), hot = smooth(0.3, 0.7, r) * 0.75;
+      const R = mix(mix(A[0], B[0], t), Hc[0], hot), G = mix(mix(A[1], B[1], t), Hc[1], hot), Bc = mix(mix(A[2], B[2], t), Hc[2], hot);
+      const lum = 0.6 + 0.8 * dens, o = (j * nw + i) * 4, dz = Math.random() * 3 - 1.5;
+      px[o] = R * lum + dz; px[o + 1] = G * lum + dz; px[o + 2] = Bc * lum + dz;
+      px[o + 3] = dens * 140;
+    }
+    if (j % 24 === 23) { await yieldFrame(); if (gen !== skyGen) return null; }
+  }
+  cc.putImageData(img, 0, 0);
+  return c;
+}
+
+async function buildSky() {
+  const gen = ++skyGen;   // новая генерация отменяет незаконченную старую
+  const SW = W * OVER, SH = H * OVER, aspect = SW / SH;
+  const N = makeNoise(SKY_SEED);
+
+  // Млечный Путь — диагональная полоса через экран
+  const ang = (N.rnd() < .5 ? -1 : 1) * (0.35 + N.rnd() * 0.35);
+  const bx = aspect / 2 + (N.rnd() - .5) * .3, by = .5 + (N.rnd() - .5) * .3;
+  const bw = .2 + N.rnd() * .1, sa = Math.sin(ang), ca = Math.cos(ang);
+  const bandAt = (x, y) => { const d = (x - bx) * sa - (y - by) * ca; return Math.exp(-(d * d) / (bw * bw)); };
+
+  // Звёзды спектральных классов: от голубых до оранжевых
+  const PAL = ['170,196,255', '200,216,255', '236,240,255', '255,246,232', '255,226,186', '255,196,160'];
+  const PW = [.16, .2, .3, .17, .11, .06];
+  const pickCol = () => { let x = N.rnd(); for (let i = 0; i < PAL.length; i++) if ((x -= PW[i]) < 0) return PAL[i]; return PAL[2]; };
+  const area = SW * SH, stars = [], bright = [], galaxies = [];
+  for (let n = Math.round(area / 1400); n--;)
+    stars.push({ u: N.rnd(), v: N.rnd(), r: 0.3 + Math.pow(N.rnd(), 3) * 1.1, a: 0.25 + N.rnd() * 0.7, c: pickCol() });
+  for (let n = Math.round(area / 500), tries = n * 6; n > 0 && tries--;) {   // звёздная пыль в полосе
+    const u = N.rnd(), v = N.rnd();
+    if (N.rnd() > Math.pow(bandAt(u * aspect, v), 1.6)) continue;
+    stars.push({ u, v, r: 0.25 + N.rnd() * 0.35, a: 0.12 + N.rnd() * 0.4, c: pickCol() });
+    n--;
+  }
+  for (let n = 9 + Math.floor(N.rnd() * 6); n--;)
+    bright.push({ u: N.rnd(), v: N.rnd(), r: 0.9 + N.rnd() * 0.9, g: 5 + N.rnd() * 9, c: pickCol(), spike: N.rnd() < .45 });
+  for (let n = 2; n--;)
+    galaxies.push({ u: .08 + N.rnd() * .84, v: .08 + N.rnd() * .84, s: 9 + N.rnd() * 14, e: .3 + N.rnd() * .4, rot: N.rnd() * Math.PI });
+
+  // Дальний план считается в низком разрешении частями, затем растягивается
+  const k = Math.min(1, Math.sqrt(160000 / area)), nw = Math.max(64, Math.round(SW * k)), nh = Math.max(64, Math.round(SH * k));
+  const far = await makeFar(N, nw, nh, aspect, bandAt, gen);
+  if (!far) return;
+  sky = { far, stars, bright, galaxies };
+  skyAspect = W / H;
+  drawSky();
+  skyWrap.classList.add('ready');
+
+  // Текстуры туманности: первая — сразу, остальные дозревают в фоне и подмешиваются при новых пролётах
+  const lw = W * 1.6, lh = H * 1.6, kt = Math.min(1, Math.sqrt(450000 / (lw * lh)));
+  const tw = Math.max(64, Math.round(lw * kt)), th = Math.max(64, Math.round(lh * kt)), texs = [];
+  for (let t = 0; t < NEB_PAL.length; t++) {
+    const tex = await makeCloud(SKY_SEED + 7919 * (t + 1), tw, th, lw / lh, NEB_PAL[t], gen);
+    if (!tex) return;
+    texs.push(tex);
+    if (t === 0) { nebTex = texs; initLayers(); nebWrap.classList.add('ready'); }
+  }
+}
+
+// ——— Слои туманности ———
+// Все слои рисуются в один холст низкого разрешения: туманность мягкая, а кадр остаётся дешёвым
+const nebCv = document.createElement('canvas'), nebCtx = nebCv.getContext('2d');
+nebWrap.appendChild(nebCv);
+let NQ = 1;   // разрешение холста туманности относительно экрана
+function initLayers() {
+  layers = [];
+  for (const phase of [0.12, 0.45, 0.78]) { const L = { phase }; respawn(L); layers.push(L); }
+}
+function sizeLayers() {
+  LW = W * 1.6; LH = H * 1.6;
+  NQ = Math.min(1, Math.sqrt(400000 / (W * H)));
+  nebCv.width = Math.max(1, Math.round(W * NQ)); nebCv.height = Math.max(1, Math.round(H * NQ));
+}
+// Слой ушёл за спину — возвращается вдаль с другой текстурой, поворотом и смещением
+function respawn(L) {
+  const used = new Set(layers.filter(l => l !== L).map(l => l.tex));
+  const all = nebTex.map((_, i) => i), free = all.filter(i => !used.has(i)), pool = free.length ? free : all;
+  L.tex = pool[Math.floor(Math.random() * pool.length)];
+  L.rot = Math.random() * Math.PI * 2;
+  L.spin = (Math.random() - .5) * 0.012;
+  L.flip = Math.random() < .5 ? -1 : 1;
+  L.ox = (Math.random() - .5) * 0.5; L.oy = (Math.random() - .5) * 0.4;   // смещение от точки схода, доли экрана
+}
+function flyNebula(dt, cx, cy, still) {
+  if (!layers.length) return;
+  const speed = still ? 0 : (1 + warp * 14) / FLY_T * calm;   // при запуске — прыжок сквозь облака
+  const c = nebCtx;
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  c.clearRect(0, 0, nebCv.width, nebCv.height);
+  for (const L of layers) {
+    L.phase += dt * speed;
+    if (L.phase >= 1) { L.phase -= 1; respawn(L); }
+    if (!still) L.rot += dt * L.spin;
+    // масштаб растёт экспоненциально — приближение с постоянной скоростью
+    const sc = 0.4 * Math.pow(7.5, L.phase);
+    const op = smooth(0, 0.3, L.phase) * (1 - smooth(0.65, 1, L.phase));
+    if (op < 0.003) continue;
+    c.globalAlpha = op;
+    c.setTransform(NQ, 0, 0, NQ, 0, 0);
+    c.translate(cx + L.ox * W * sc, cy + L.oy * H * sc);
+    c.rotate(L.rot);
+    c.scale(sc * L.flip, sc);
+    c.drawImage(nebTex[L.tex], -LW / 2, -LH / 2, LW, LH);
+  }
+  c.globalAlpha = 1;
+}
+
+function drawSky() {
+  if (!sky) return;
+  const dpr = Math.min(1.5, window.devicePixelRatio || 1), SW = W * OVER, SH = H * OVER, TAU = Math.PI * 2;
+  skyEl.width = Math.round(SW * dpr); skyEl.height = Math.round(SH * dpr);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.imageSmoothingEnabled = true; sctx.imageSmoothingQuality = 'high';
+  sctx.drawImage(sky.far, 0, 0, SW, SH);
+  for (const st of sky.stars) {
+    sctx.fillStyle = `rgba(${st.c},${st.a.toFixed(3)})`;
+    sctx.beginPath(); sctx.arc(st.u * SW, st.v * SH, st.r, 0, TAU); sctx.fill();
+  }
+  for (const g of sky.galaxies) {   // далёкие галактики — размытые эллипсы с ярким ядром
+    sctx.save();
+    sctx.translate(g.u * SW, g.v * SH); sctx.rotate(g.rot); sctx.scale(1, g.e);
+    const gr = sctx.createRadialGradient(0, 0, 0, 0, 0, g.s);
+    gr.addColorStop(0, 'rgba(255,240,225,.55)'); gr.addColorStop(.18, 'rgba(220,200,255,.22)'); gr.addColorStop(1, 'rgba(160,150,255,0)');
+    sctx.fillStyle = gr; sctx.beginPath(); sctx.arc(0, 0, g.s, 0, TAU); sctx.fill();
+    sctx.restore();
+  }
+  for (const b of sky.bright) {   // яркие звёзды: ореол и дифракционные лучи
+    const x = b.u * SW, y = b.v * SH;
+    const gr = sctx.createRadialGradient(x, y, 0, x, y, b.g);
+    gr.addColorStop(0, `rgba(${b.c},.9)`); gr.addColorStop(.12, `rgba(${b.c},.35)`); gr.addColorStop(1, `rgba(${b.c},0)`);
+    sctx.fillStyle = gr; sctx.beginPath(); sctx.arc(x, y, b.g, 0, TAU); sctx.fill();
+    if (b.spike) {
+      const L = b.g * 2.6;
+      sctx.lineWidth = .6;
+      for (let q = 0; q < 4; q++) {
+        const an = 0.21 + q * Math.PI / 2, ex = x + Math.cos(an) * L, ey = y + Math.sin(an) * L;
+        const lg = sctx.createLinearGradient(x, y, ex, ey);
+        lg.addColorStop(0, `rgba(${b.c},.55)`); lg.addColorStop(1, `rgba(${b.c},0)`);
+        sctx.strokeStyle = lg; sctx.beginPath(); sctx.moveTo(x, y); sctx.lineTo(ex, ey); sctx.stroke();
+      }
+    }
+    sctx.fillStyle = 'rgba(255,255,255,.95)'; sctx.beginPath(); sctx.arc(x, y, b.r, 0, TAU); sctx.fill();
+  }
+}
+
+// ——— Звёздное поле: при запуске — прыжок через гиперпространство ———
+const cv = $('#stars'), ctx = cv.getContext('2d');
+let W = 0, H = 0, F = 1, warp = 0, VX = 0, VY = 0;
+const DYN = ['180,200,255', '214,226,255', '240,244,255', '255,240,222', '255,214,178'];
+const stars = [];
+function spawn(p, anywhere) {
+  p.x = (Math.random() * 2 - 1) * 1.6; p.y = (Math.random() * 2 - 1) * 1.6;
+  p.z = anywhere ? 0.05 + Math.random() * 0.95 : 1;
+  p.a = 0.35 + Math.random() * 0.65;
+  p.c = DYN[Math.floor(Math.random() * DYN.length)];
+  return p;
+}
+// высота «большого» экрана: не меняется, когда на телефоне прячется адресная строка
+const vhProbe = document.createElement('div');
+vhProbe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100vh;height:100lvh;visibility:hidden;pointer-events:none';
+document.body.appendChild(vhProbe);
+function resize() {
+  const w = innerWidth, h = Math.max(innerHeight, vhProbe.offsetHeight);
+  if (w === W && h === H) return;   // изменилась только видимая высота — космос не трогаем
+  const dpr = Math.min(1.5, window.devicePixelRatio || 1);   // звёзды перерисовываются каждый кадр: 1,5 вместо 2 — на «ретине» на 44% меньше пикселей
+  W = w; H = h; F = Math.max(W, H) * 0.5;
+  cv.width = W * dpr; cv.height = H * dpr;
+  cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const n = Math.round(Math.min(320, W * H / 4500));
+  while (stars.length < n) stars.push(spawn({}, true));
+  stars.length = n;
+  // точка схода — за барабаном в его положении без прокрутки; космос неподвижен, страница едет поверх
+  const r = drumEl.getBoundingClientRect();
+  VX = r.left + r.width / 2;
+  VY = Math.min(H * 0.6, Math.max(0, r.top + window.scrollY + r.height / 2));
+  layout();
+  if (!spinning) activate();   // сцены анимаций пересобираются под новый размер
+  sizeLayers();
+  clearTimeout(skyTimer);
+  skyTimer = setTimeout(() => {
+    if (!sky) return;
+    // заметно сменились пропорции (поворот экрана) — пересчитать небо, иначе только перерисовать
+    if (Math.abs(Math.log(W / H / skyAspect)) > 0.25) buildSky(); else drawSky();
+  }, 200);
+}
+
+let meteor = null, nextMeteor = 0;
+function drawMeteor(now, still) {
+  if (!meteor) {
+    if (still || spinning || reading) return;
+    if (!nextMeteor) nextMeteor = now + 3000 + Math.random() * 6000;
+    if (now < nextMeteor) return;
+    const dir = Math.random() < .5 ? 1 : -1, an = 0.3 + Math.random() * 0.45;
+    meteor = {
+      t0: now, life: 650 + Math.random() * 450, speed: 0.7 + Math.random() * 0.5, len: 90 + Math.random() * 110,
+      x: W * (dir > 0 ? 0.1 + Math.random() * 0.5 : 0.4 + Math.random() * 0.5), y: H * Math.random() * 0.4,
+      dx: Math.cos(an) * dir, dy: Math.sin(an)
+    };
+  }
+  const m = meteor, t = (now - m.t0) / m.life;
+  if (t >= 1) { meteor = null; nextMeteor = now + 7000 + Math.random() * 11000; return; }
+  const env = Math.sin(Math.PI * t), d = (now - m.t0) * m.speed, L = m.len * (0.4 + 0.6 * env);
+  const hx = m.x + m.dx * d, hy = m.y + m.dy * d, col = '235,240,255';
+  const g = ctx.createLinearGradient(hx - m.dx * L, hy - m.dy * L, hx, hy);
+  g.addColorStop(0, `rgba(${col},0)`); g.addColorStop(1, `rgba(${col},${(0.85 * env).toFixed(3)})`);
+  ctx.strokeStyle = g; ctx.lineWidth = 1.3;
+  ctx.beginPath(); ctx.moveTo(hx - m.dx * L, hy - m.dy * L); ctx.lineTo(hx, hy); ctx.stroke();
+}
+
+// ——— Планеты: изредка пролетаем мимо ———
+const mixC = (a, b, t) => [mix(a[0], b[0], t), mix(a[1], b[1], t), mix(a[2], b[2], t)];
+const PLANET_KINDS = ['gas', 'rock', 'ocean', 'ice', 'lava'];
+const GAS_PAL = [   // [светлые полосы, тёмные полосы, дымка, шторм]
+  [[226, 196, 158], [168, 112, 78], [246, 232, 208], [196, 92, 70]],
+  [[146, 186, 218], [66, 104, 168], [216, 234, 246], [96, 72, 168]],
+  [[198, 164, 216], [108, 80, 158], [236, 218, 244], [214, 118, 150]],
+  [[214, 180, 132], [140, 92, 70], [240, 216, 178], [110, 66, 58]]
+];
+const ROCK_PAL = [[[148, 78, 54], [216, 148, 100]], [[94, 92, 90], [198, 194, 188]], [[118, 96, 70], [208, 182, 132]]];
+const OCEAN_PAL = [
+  { deep: [16, 44, 92], shallow: [40, 112, 162], low: [66, 108, 58], high: [150, 130, 92] },
+  { deep: [14, 52, 70], shallow: [36, 130, 140], low: [112, 66, 108], high: [186, 146, 168] }   // чужой мир: фиолетовая растительность
+];
+const RING_PAL = [[[214, 196, 168], [146, 134, 122]], [[192, 202, 218], [118, 128, 148]], [[206, 178, 150], [120, 96, 84]]];
+let planet = null, nextPlanet = 0, planetSprite = null, planetBusy = false, lastKind = '';
+
+async function makePlanet(seed) {
+  const N = makeNoise(seed), rnd = N.rnd, pickR = a => a[Math.floor(rnd() * a.length)];
+  let kind;
+  do { kind = pickR(PLANET_KINDS); } while (kind === lastKind);
+  lastKind = kind;
+  const R = 240, ringed = kind === 'gas' ? rnd() < .65 : kind === 'rock' && rnd() < .2;
+  const pad = ringed ? 2.3 : 1.3, S = Math.ceil(R * pad) * 2, C = S / 2;
+  const tilt = (rnd() - .5) * 0.9, ct = Math.cos(tilt), st = Math.sin(tilt);
+  // свет далёкой звезды: сбоку и чуть спереди — видны освещённая сторона и терминатор
+  const la = rnd() * Math.PI * 2, Lz = 0.3 + rnd() * 0.45, lr = Math.sqrt(1 - Lz * Lz);
+  const Lx = Math.cos(la) * lr, Ly = Math.sin(la) * lr;
+
+  // Поверхность в точке (долгота, широта): [r, g, b] альбедо и, у лавы, [er, eg, eb] собственное свечение
+  let atm = [200, 190, 180], atmA = .06, limb = .2, surf;
+  if (kind === 'gas') {
+    const pal = pickR(GAS_PAL), freq = 7 + rnd() * 9, storm = rnd() < .6;
+    const sp = { lon: (rnd() - .5) * 1.2, lat: (rnd() - .5) * 1.1, r: .12 + rnd() * .12 };
+    atm = pal[2]; atmA = .28; limb = .45;
+    surf = (lon, lat) => {
+      let c = mixC(pal[0], pal[1], .5 + .5 * Math.sin(lat * freq + N.fbm(lon * 1.2, lat * 5, 4) * 2.2));
+      c = mixC(c, pal[2], smooth(.1, .5, N.fbm(lon * 3 + 9, lat * 12, 3)) * .5);
+      if (storm) {
+        const d = Math.hypot((lon - sp.lon) * .8, (lat - sp.lat) * 1.6) / sp.r;
+        if (d < 1) c = mixC(c, pal[3], (1 - smooth(.45, 1, d)) * .8);
+      }
+      return c;
+    };
+  } else if (kind === 'rock') {
+    const pal = pickR(ROCK_PAL), craters = [];
+    for (let n = 34; n--;) craters.push({ lon: (rnd() - .5) * 3.2, lat: (rnd() - .5) * 2.8, r: .03 + rnd() * rnd() * .2 });
+    surf = (lon, lat) => {
+      const c = mixC(pal[0], pal[1], smooth(-.45, .45, N.fbm(lon * 2.2, lat * 2.2, 6)));
+      const cl = Math.cos(lat);
+      let k = 1;
+      for (const q of craters) {   // кратер: тёмное дно и светлый вал
+        const d = Math.hypot((lon - q.lon) * cl, lat - q.lat) / q.r;
+        if (d < 1.2) k *= d < 1 ? .8 + .2 * d * d : 1 + .25 * (1 - Math.abs(d - 1.05) / .15);
+      }
+      return [c[0] * k, c[1] * k, c[2] * k];
+    };
+  } else if (kind === 'ocean') {
+    const pal = pickR(OCEAN_PAL), sea = (rnd() - .5) * .2;
+    atm = [120, 170, 255]; atmA = .5; limb = .3;
+    surf = (lon, lat) => {
+      const h = N.fbm(lon * 1.7, lat * 1.7, 6) - sea;
+      let c = h < 0 ? mixC(pal.deep, pal.shallow, smooth(-.3, 0, h)) : mixC(pal.low, pal.high, smooth(0, .32, h));
+      if (Math.abs(lat) + N.fbm(lon * 3 + 3, lat * 3, 3) * .35 > 1.18) c = [232, 238, 244];   // полярные шапки
+      return mixC(c, [242, 245, 250], smooth(.05, .45, N.fbm(lon * 2.5 + 40, lat * 5, 5)) * .85);   // облака
+    };
+  } else if (kind === 'ice') {
+    atm = [176, 222, 255]; atmA = .3; limb = .3;
+    surf = (lon, lat) => {
+      const base = mixC([186, 214, 232], [234, 244, 250], smooth(-.3, .3, N.fbm(lon * 1.5 + 5, lat * 1.5, 4)));
+      return mixC(base, [104, 146, 182], smooth(.9, .97, 1 - Math.abs(N.fbm(lon * 3, lat * 3, 5))) * .75);   // трещины
+    };
+  } else {
+    atm = [255, 140, 80]; atmA = .3; limb = .3;
+    surf = (lon, lat) => {
+      const c = mixC([40, 30, 32], [104, 80, 70], smooth(-.4, .4, N.fbm(lon * 2 + 7, lat * 2, 5)));
+      const ridge = 1 - Math.abs(N.fbm(lon * 2.4, lat * 2.4, 5)), gl = smooth(.9, .975, ridge), hot = smooth(.955, .995, ridge);
+      return [c[0], c[1], c[2], 225 * gl, 80 * gl + 110 * hot, 20 * gl + 80 * hot];   // раскалённые разломы
+    };
+  }
+
+  // Диск: сфера с наклоном оси, мягкий терминатор, затемнение к краю, кромка атмосферы
+  const D = 2 * R, pc = document.createElement('canvas');
+  pc.width = pc.height = D;
+  const pg = pc.getContext('2d'), img = pg.createImageData(D, D), px = img.data;
+  for (let j = 0; j < D; j++) {
+    const v = (j + .5 - R) / R;
+    for (let i = 0; i < D; i++) {
+      const u = (i + .5 - R) / R, d2 = u * u + v * v;
+      if (d2 > 1.01) continue;
+      const nz = Math.sqrt(Math.max(0, 1 - d2));
+      const tu = u * ct + v * st, tv = -u * st + v * ct;
+      const c = surf(Math.atan2(tu, nz), Math.asin(Math.max(-1, Math.min(1, tv))));
+      const dot = u * Lx + v * Ly + nz * Lz;
+      const sh = 0.02 + smooth(-0.1, 0.65, dot) * (1 - limb + limb * nz);
+      const rim = Math.pow(1 - nz, 2.5) * atmA * smooth(-0.2, 0.5, dot);
+      const o = (j * D + i) * 4;
+      px[o] = c[0] * sh + atm[0] * rim + (c[3] || 0);
+      px[o + 1] = c[1] * sh + atm[1] * rim + (c[4] || 0);
+      px[o + 2] = c[2] * sh + atm[2] * rim + (c[5] || 0);
+      px[o + 3] = 255 * Math.min(1, Math.max(0, (1 - Math.sqrt(d2)) * R + .5));
+    }
+    if (j % 16 === 15) await yieldFrame();
+  }
+  pg.putImageData(img, 0, 0);
+
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d');
+  if (atmA > .1) {   // внешнее свечение атмосферы, смещено к источнику света
+    const ox = C + Lx * R * .06, oy = C + Ly * R * .06;
+    const gr = g.createRadialGradient(ox, oy, R * .96, ox, oy, R * 1.22);
+    gr.addColorStop(0, `rgba(${atm.join(',')},${(atmA * .55).toFixed(3)})`); gr.addColorStop(1, `rgba(${atm.join(',')},0)`);
+    g.fillStyle = gr; g.beginPath(); g.arc(ox, oy, R * 1.22, 0, Math.PI * 2); g.fill();
+  }
+  let rc = null;
+  if (ringed) {   // кольца: плотность и цвет меняются по радиусу, есть щель
+    rc = document.createElement('canvas');
+    rc.width = rc.height = S;
+    const rg = rc.getContext('2d'), rp = pickR(RING_PAL);
+    const ri = R * (1.25 + rnd() * .15), ro = R * (1.85 + rnd() * .35), flat = .16 + rnd() * .2, gap = .45 + rnd() * .3;
+    rg.translate(C, C); rg.rotate(tilt); rg.scale(1, flat);
+    for (let r = ri; r < ro; r += 0.6) {
+      const t = (r - ri) / (ro - ri);
+      const dens = smooth(0, .08, t) * (1 - smooth(.9, 1, t)) * (.3 + .7 * smooth(-.4, .4, N.fbm(t * 9 + 21, 3.3, 4))) * (Math.abs(t - gap) < .025 ? .08 : 1);
+      const col = mixC(rp[0], rp[1], smooth(-.4, .4, N.fbm(t * 5 + 11, 7.1, 3))).map(Math.round).join(',');
+      rg.strokeStyle = `rgba(${col},${(dens * .45).toFixed(3)})`;
+      rg.lineWidth = 1.2;
+      rg.beginPath(); rg.arc(0, 0, r, 0, Math.PI * 2); rg.stroke();
+    }
+  }
+  // задняя половина колец — за диском, передняя — перед ним
+  const ringHalf = front => {
+    g.save(); g.translate(C, C); g.rotate(tilt);
+    g.beginPath(); g.rect(-S, front ? 0 : -S, 2 * S, S); g.clip();
+    g.rotate(-tilt); g.translate(-C, -C); g.drawImage(rc, 0, 0);
+    g.restore();
+  };
+  if (rc) ringHalf(false);
+  g.drawImage(pc, C - R, C - R);
+  if (rc) ringHalf(true);
+
+  return { mips: mipChain(c), pad };
+}
+
+// мип-уровни: уменьшенные копии спрайта, чтобы далёкие тела не мерцали
+function mipChain(c) {
+  const mips = [c];
+  for (let m = c; m.width > 48;) {
+    const n = document.createElement('canvas');
+    n.width = n.height = Math.ceil(m.width / 2);
+    const ng = n.getContext('2d');
+    ng.imageSmoothingQuality = 'high';
+    ng.drawImage(m, 0, 0, n.width, n.height);
+    mips.push(n); m = n;
+  }
+  return mips;
+}
+const pickMip = (mips, size) => {   // наименьшая копия, которая не меньше размера на экране
+  const need = size * Math.min(2, window.devicePixelRatio || 1);
+  let im = mips[0];
+  for (const m of mips) if (m.width >= need) im = m;
+  return im;
+};
+// диагональные траектории огибают колонку с текстом; планета и светило уходят в разные углы
+// четверти: 0 — вниз-вправо, 1 — вниз-влево, 2 — вверх-влево, 3 — вверх-вправо
+function pickLane(avoid, allowed = [0, 1, 2, 3]) {
+  const free = allowed.filter(q => q !== avoid), list = free.length ? free : allowed;
+  const q = list[Math.floor(Math.random() * list.length)];
+  return { q, an: Math.PI / 4 + q * Math.PI / 2 + (Math.random() - .5) * 0.9 };
+}
+
+async function preparePlanet() {
+  planetBusy = true;
+  planetSprite = await makePlanet(crypto.getRandomValues(new Uint32Array(1))[0]);
+  planetBusy = false;
+}
+function updatePlanet(dt, now, cx, cy, still) {
+  if (!planet) {
+    if (still) return;
+    // следующая планета готовится заранее, когда туманность уже собрана
+    if (!planetSprite) { if (!planetBusy && !sunBusy && nebTex.length === NEB_PAL.length) preparePlanet(); return; }
+    if (!nextPlanet) nextPlanet = now + 6000 + Math.random() * 8000;
+    if (now < nextPlanet) return;
+    const lane = pickLane(sun ? sun.q : -1), d = 0.55 + Math.random() * 0.25;
+    planet = { spr: planetSprite, q: lane.q, x: Math.cos(lane.an) * d, y: Math.sin(lane.an) * d * .75, z: 5, r: 0.07 + Math.random() * 0.07 };
+    planetSprite = null;
+  }
+  const p = planet;
+  p.z -= dt * 0.15 * (1 + warp * 14) * calm;
+  const k = F / p.z, half = p.r * k * p.spr.pad, x = cx + p.x * k, y = cy + p.y * k;
+  if (p.z < 0.08 || x + half < 0 || x - half > W || y + half < 0 || y - half > H) {
+    planet = null; nextPlanet = now + 25000 + Math.random() * 35000;
+  }
+}
+function drawPlanet(cx, cy) {
+  const p = planet, k = F / p.z, half = p.r * k * p.spr.pad;
+  ctx.globalAlpha = smooth(5, 4.2, p.z);   // проявляется из глубины
+  ctx.drawImage(pickMip(p.spr.mips, half * 2), cx + p.x * k - half, cy + p.y * k - half, half * 2, half * 2);
+  ctx.globalAlpha = 1;
+}
+
+// ——— Светила: звёзды разных типов и созвездия; летят впятеро медленнее планет ———
+const SUN_KINDS = [['yellow', .17], ['red', .15], ['blue', .13], ['white', .1], ['binary', .12], ['pulsar', .1], ['constellation', .23]];
+const SUN_R = { yellow: .05, red: .085, blue: .06, white: .03, binary: .06, pulsar: .035 };   // размер в мире
+const STAR_LOOK = {   // [центр диска, край диска, свечение]
+  yellow: [[255, 228, 150], [255, 138, 40], [255, 200, 120]],
+  red: [[255, 172, 108], [214, 72, 36], [255, 118, 70]],
+  blue: [[236, 244, 255], [150, 180, 255], [150, 186, 255]],
+  white: [[252, 253, 255], [196, 212, 255], [210, 226, 255]]
+};
+const CONST_NAMES = T.constNames;
+const SERIF = '"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif';
+let sun = null, nextSun = 0, sunSprite = null, sunBusy = false, lastSunKind = '', lastConst = '';
+
+const rgba = (c, a) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
+function glowAt(g, x, y, r0, r1, col, a) {
+  const gr = g.createRadialGradient(x, y, r0, x, y, r1);
+  gr.addColorStop(0, rgba(col, a)); gr.addColorStop(1, rgba(col, 0));
+  g.fillStyle = gr; g.beginPath(); g.arc(x, y, r1, 0, Math.PI * 2); g.fill();
+}
+// Свечение кромки: ярче всего ровно на краю диска и плавно гаснет внутрь и наружу — диск срастается с короной
+function limbGlow(g, x, y, R, col, a) {
+  const gr = g.createRadialGradient(x, y, R * .8, x, y, R * 1.3);
+  gr.addColorStop(0, rgba(col, 0)); gr.addColorStop(.38, rgba(col, a)); gr.addColorStop(1, rgba(col, 0));
+  g.fillStyle = gr; g.beginPath(); g.arc(x, y, R * 1.3, 0, Math.PI * 2); g.fill();
+}
+// Дифракционные лучи: сужающиеся клинья с затуханием, как у ярких звёзд на снимках телескопов
+function spikes(g, x, y, len, n, col, a, w, rot) {
+  for (let k = 0; k < n; k++) {
+    const an = rot + k * Math.PI * 2 / n, ca = Math.cos(an), sa = Math.sin(an);
+    const lg = g.createLinearGradient(x, y, x + ca * len, y + sa * len);
+    lg.addColorStop(0, rgba(col, a)); lg.addColorStop(.3, rgba(col, a * .35)); lg.addColorStop(1, rgba(col, 0));
+    g.fillStyle = lg;
+    g.beginPath(); g.moveTo(x - sa * w, y + ca * w); g.lineTo(x + ca * len, y + sa * len); g.lineTo(x + sa * w, y - ca * w); g.closePath(); g.fill();
+  }
+}
+// «Вспышка»: множество тонких лучиков разной длины вокруг очень яркой звезды
+function starburst(g, x, y, R, col, n, rnd) {
+  g.lineWidth = .7;
+  for (let k = 0; k < n; k++) {
+    const an = rnd() * Math.PI * 2, len = R * (1.1 + rnd() * 1.3);
+    const lg = g.createLinearGradient(x, y, x + Math.cos(an) * len, y + Math.sin(an) * len);
+    lg.addColorStop(0, rgba(col, .1 + rnd() * .12)); lg.addColorStop(1, rgba(col, 0));
+    g.strokeStyle = lg; g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(an) * len, y + Math.sin(an) * len); g.stroke();
+  }
+}
+// Попиксельная кисть: f(x, y, out) в единицах радиуса R от центра (cx, cy); true — пиксель закрашен
+async function paint(S, R, f, cx = 0, cy = 0) {
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d'), img = g.createImageData(S, S), px = img.data, C = S / 2, out = [0, 0, 0, 0];
+  for (let j = 0; j < S; j++) {
+    const y = (j + .5 - C) / R - cy;
+    for (let i = 0; i < S; i++) {
+      if (!f((i + .5 - C) / R - cx, y, out)) continue;
+      const o = (j * S + i) * 4;
+      px[o] = out[0]; px[o + 1] = out[1]; px[o + 2] = out[2]; px[o + 3] = out[3];
+    }
+    if (j % 24 === 23) await yieldFrame();
+  }
+  g.putImageData(img, 0, 0);
+  return c;
+}
+const putPx = (out, col, a) => { out[0] = col[0]; out[1] = col[1]; out[2] = col[2]; out[3] = a * 255; return true; };
+
+// Корона из радиальных струй: шум частый по углу и редкий по радиусу; яркость падает от края диска
+const coronaBrush = (N, outer, cIn, cOut, streak, power, gain) => (x, y, out) => {
+  const r = Math.hypot(x, y);
+  if (r < .95 || r > outer) return false;
+  const an = Math.atan2(y, x), s = N.fbm(Math.cos(an) * streak + 7.3, Math.sin(an) * streak + r * .35, 4);
+  const a = Math.min(1, Math.pow((outer - r) / (outer - .95), power) / Math.max(1, r * r) * (.4 + .95 * smooth(-.25, .45, s)) * gain);
+  return a > .004 && putPx(out, mixC(cIn, cOut, smooth(1, outer, r)), a);
+};
+// Диск: потемнение к краю, гранулы с тёмными прожилками, супергрануляция, факелы у края, пятна с волокнистой полутенью
+function discBrush(N, R, look, { cells = 14, contrast = .3, faculae = .25, spots = [], soft = false, lift = 1, mottle = false, filaments = true }) {
+  return (x, y, out) => {
+    const d2 = x * x + y * y;
+    if (d2 > 1.02) return false;
+    const r = Math.sqrt(d2), mu = Math.sqrt(Math.max(0, 1 - d2));
+    const n = N.fbm(x * cells + 3, y * cells + 7, 4), lanes = mottle ? smooth(-.35, .45, n) : smooth(0, .16, Math.abs(n));
+    let b = (.72 + .28 * mu) * (1 - contrast + contrast * lanes) * (1 + N.fbm(x * cells * .22 + 11, y * cells * .22 + 5, 3) * .15) * lift;
+    b += smooth(.1, .55, N.fbm(x * 3 + 21, y * 3 + 9, 3)) * Math.pow(1 - mu, 2) * faculae;
+    for (const q of spots) {
+      const dx = x - q.x, dy = y - q.y, dd = Math.hypot(dx, dy) / q.r;
+      if (dd >= 1) continue;
+      b *= !filaments ? .45 + .55 * smooth(.25, 1, dd)   // у гигантов пятна мягкие, без волокон
+        : dd < .42 ? .16 : (.42 + .38 * smooth(.42, 1, dd)) * (.82 + .18 * Math.sin(Math.atan2(dy, dx) * 22 + N.fbm(dx * 25, dy * 25, 2) * 5));
+    }
+    const col = mixC(look[0], look[1], Math.pow(1 - mu, 1.4));
+    out[0] = col[0] * b; out[1] = col[1] * b; out[2] = col[2] * b;
+    out[3] = 255 * (soft ? 1 - smooth(.84, 1.01, r) : Math.min(1, Math.max(0, (1 - r) * R + .5)));
+    return true;
+  };
+}
+// группы пятен в активных широтах
+function spotGroups(N, groups, maxR) {
+  const sp = [];
+  for (let k = 0; k < groups; k++) {
+    const gx = (N.rnd() - .5) * 1.1, gy = (N.rnd() < .5 ? -1 : 1) * (.15 + N.rnd() * .35);
+    for (let n = 2 + Math.floor(N.rnd() * 3); n--;) sp.push({ x: gx + (N.rnd() - .5) * .25, y: gy + (N.rnd() - .5) * .1, r: .025 + N.rnd() * maxR });
+  }
+  return sp;
+}
+// Хромосфера и протуберанцы: светящийся обод и языки пламени над краем диска
+const promBrush = (N, proms) => (x, y, out) => {
+  const r = Math.hypot(x, y);
+  if (r < .975 || r > 1.32) return false;
+  const an = Math.atan2(y, x);
+  let a = Math.exp(-Math.pow((r - 1.004) / .014, 2)) * .85;
+  for (const p of proms) {
+    let da = Math.abs(an - p.an);
+    if (da > Math.PI) da = Math.PI * 2 - da;
+    const win = Math.exp(-Math.pow(da / p.w, 2));
+    if (win < .02) continue;
+    a = Math.max(a, win * smooth(0, .55, N.fbm(an * 16 + p.seed, r * 10, 4)) * (1 - smooth(1 + p.h * .6, 1 + p.h, r)) * .9);
+  }
+  return a > .01 && putPx(out, [255, 120 + 60 * (1 - smooth(1, 1.2, r)), 80], a);
+};
+// Клочковатая оболочка гиганта: пыль и газ, уносимые звёздным ветром
+const envelopeBrush = (N, outer, cIn, cOut) => (x, y, out) => {
+  const r = Math.hypot(x, y);
+  if (r < .9 || r > outer) return false;
+  const a = Math.pow((outer - r) / (outer - .9), 1.7) * (.25 + .75 * smooth(-.15, .5, N.fbm(x * 1.7 + 4, y * 1.7 + 9, 5))) * .8;
+  return a > .004 && putPx(out, mixC(cIn, cOut, smooth(.9, outer, r)), a);
+};
+// Планетарная туманность: кольцо с волокнами — кислород светится бирюзой внутри, водород краснеет снаружи
+const ringNebula = (N, tilt, flat, rad, width) => {
+  const ct = Math.cos(tilt), st = Math.sin(tilt);
+  return (x, y, out) => {
+    const u = x * ct + y * st, v = (-x * st + y * ct) / flat, q = Math.hypot(u, v);
+    if (q > rad + width * 2.6) return false;
+    const fil = smooth(-.2, .5, N.fbm(x * 2.6 + 3, y * 2.6 + 8, 5));
+    const shell = Math.exp(-Math.pow((q - rad) / width, 2)), halo = Math.exp(-Math.pow((q - rad * 1.35) / (width * 1.6), 2)) * .18;
+    const a = Math.min(1, (shell * (.35 + .75 * fil) + (q < rad ? .18 * q / rad : 0) + halo * fil) * .9);
+    return a > .004 && putPx(out, mixC([90, 225, 215], [235, 90, 120], smooth(rad * .7, rad * 1.25, q)), a);
+  };
+};
+// Туманность вокруг пульсара: тонкие волокна (гребни шума) в облаке звёздного ветра
+const windNebula = N => (x, y, out) => {
+  const r = Math.hypot(x, y);
+  if (r > 2.9) return false;
+  const q = N.fbm(x * 1.3 + 2, y * 1.3 + 7, 3);
+  const fil = Math.pow(smooth(.9, .985, 1 - Math.abs(N.fbm(x * 2 + q * 1.5 + 5, y * 2 - q * 1.5 + 1, 4))), 1.2);
+  const patch = smooth(-.05, .35, N.fbm(x * .9 + 9, y * .9 + 3, 3));   // волокна видны только местами
+  const a = Math.min(1, fil * patch * Math.exp(-Math.pow(r / 1.4, 2)));
+  return a > .004 && putPx(out, mixC([150, 170, 255], [230, 100, 140], smooth(.4, 2.2, r) * (.5 + .5 * fil)), a);
+};
+// Аккреционный диск: спиральные рукава, горячий центр и горячее пятно, куда падает поток
+const diskBrush = (N, tilt, flat, rIn, rOut) => {
+  const ct = Math.cos(tilt), st = Math.sin(tilt);
+  return (x, y, out) => {
+    const u = x * ct + y * st, v = (-x * st + y * ct) / flat, q = Math.hypot(u, v);
+    if (q < rIn || q > rOut * 1.15) return false;
+    const t = (q - rIn) / (rOut - rIn);
+    const arms = .55 + .45 * Math.sin(2 * Math.atan2(v, u) - q * 9 + N.fbm(u * 6, v * 6, 2) * 2);
+    const a = Math.min(1, (1 - smooth(.7, 1.1, t)) * smooth(0, .08, t) * arms * .95 + Math.exp(-Math.pow(Math.hypot(u + rOut * .9, v) / .07, 2)) * .9);
+    return a > .004 && putPx(out, mixC([255, 252, 240], [255, 140, 80], Math.min(1, t)), a);
+  };
+};
+
+async function makeStarSprite(kind, seed) {
+  const N = makeNoise(seed), R = 128, rnd = N.rnd;
+  const pad = { yellow: 3.3, red: 2.9, blue: 3.6, white: 3.1, binary: 3.3, pulsar: 3.4 }[kind];
+  const S = Math.ceil(R * pad) * 2, C = S / 2;
+  const layer = () => { const c = document.createElement('canvas'); c.width = c.height = S; return [c, c.getContext('2d')]; };
+  const [back, bg] = layer(), [front, fg] = layer();
+  bg.globalCompositeOperation = fg.globalCompositeOperation = 'lighter';   // свет складывается
+  const put = (g, c, x = 0, y = 0, mode = 'lighter') => { g.globalCompositeOperation = mode; g.drawImage(c, x, y); g.globalCompositeOperation = 'lighter'; };
+  if (kind === 'yellow') {   // жёлтый карлик: корона из струй, гранулы, пятна, факелы, протуберанцы
+    const look = STAR_LOOK.yellow;
+    glowAt(bg, C, C, R * .9, R * 3.3, look[2], .16);
+    put(bg, await paint(S, R, coronaBrush(N, 3.2, [255, 238, 205], [255, 185, 120], 4.5, 1.3, .75)));
+    put(fg, await paint(S, R, discBrush(N, R, look, { cells: 26, contrast: .1, faculae: .25, spots: spotGroups(N, 2, .05), lift: 1.12 })), 0, 0, 'source-over');
+    const proms = [];
+    for (let n = 4 + Math.floor(rnd() * 3); n--;) proms.push({ an: rnd() * Math.PI * 2, w: .06 + rnd() * .1, h: .1 + rnd() * .18, seed: rnd() * 50 });
+    put(fg, await paint(S, R, promBrush(N, proms)));
+    limbGlow(fg, C, C, R, look[2], .5);
+  } else if (kind === 'red') {   // красный гигант: огромные конвективные ячейки, тёмные пятна, клочковатая оболочка
+    const look = STAR_LOOK.red;
+    glowAt(bg, C, C, R * .8, R * 2.9, look[2], .22);
+    put(bg, await paint(S, R, envelopeBrush(N, 2.8, [255, 150, 90], [150, 50, 40])));
+    const spots = [0, 1].map(() => ({ x: (rnd() - .5) * .9, y: (rnd() - .5) * .9, r: .14 + rnd() * .12 }));
+    put(fg, await paint(S, R, discBrush(N, R, look, { cells: 3, contrast: .3, faculae: 0, spots, soft: true, mottle: true, lift: 1.3, filaments: false })), 0, 0, 'source-over');
+    limbGlow(fg, C, C, R, look[2], .38);
+  } else if (kind === 'blue') {   // голубой гигант: тонкие струи короны, шесть лучей, вспышка, ореол
+    const look = STAR_LOOK.blue;
+    glowAt(bg, C, C, R * .9, R * 3.5, look[2], .2);
+    put(bg, await paint(S, R, coronaBrush(N, 3.4, [235, 242, 255], [140, 175, 255], 9, 1.7, .8)));
+    put(fg, await paint(S, R, discBrush(N, R, look, { cells: 22, contrast: .12, faculae: .1, lift: 1.12 })), 0, 0, 'source-over');
+    glowAt(fg, C, C, R * .6, R * 1.3, look[2], .45);
+    limbGlow(fg, C, C, R, look[2], .4);
+    spikes(fg, C, C, R * 3.4, 6, look[0], .6, R * .05, Math.PI / 2);
+    spikes(fg, C, C, R * 2, 2, look[0], .3, R * .03, 0);
+    starburst(fg, C, C, R, look[0], 28, rnd);
+    fg.strokeStyle = rgba(look[2], .06); fg.lineWidth = 3; fg.beginPath(); fg.arc(C, C, R * 2.5, 0, Math.PI * 2); fg.stroke();
+  } else if (kind === 'white') {   // белый карлик в кольце планетарной туманности
+    const look = STAR_LOOK.white, r = Math.round(R * .2);
+    put(bg, await paint(S, R, ringNebula(N, rnd() * Math.PI, .65 + rnd() * .15, 2, .33)));
+    glowAt(fg, C, C, 0, R * 1.3, look[2], .55);
+    put(fg, await paint(r * 2, r, discBrush(N, r, look, { cells: 4, contrast: .02, faculae: 0 })), C - r, C - r, 'source-over');
+    glowAt(fg, C, C, r * .5, r * 2.2, look[2], .6);
+    spikes(fg, C, C, R * 2.8, 4, look[0], .65, R * .035, .2);
+    spikes(fg, C, C, R * 1.4, 4, look[0], .25, R * .02, .2 + Math.PI / 4);
+  } else if (kind === 'binary') {   // двойная: поток газа с гиганта на аккреционный диск карлика, джеты
+    const red = STAR_LOOK.red, wd = STAR_LOOK.white, gx = -.6, wx = 1.5, wy = .1, tilt = -.25;
+    glowAt(bg, C + gx * R, C, R * .8, R * 2.3, red[2], .25);
+    put(bg, await paint(S, R, envelopeBrush(N, 1.9, [255, 150, 90], [150, 50, 40]), gx, 0));
+    glowAt(bg, C + wx * R, C + wy * R, 0, R * 1.1, wd[2], .4);
+    put(fg, await paint(S, R, discBrush(N, R, red, { cells: 3, contrast: .3, faculae: 0, soft: true, mottle: true, lift: 1.3 }), gx, 0), 0, 0, 'source-over');
+    limbGlow(fg, C + gx * R, C, R, red[2], .38);
+    for (let i = 0; i <= 40; i++) {   // поток: клочья газа вдоль дуги, остывают к гиганту
+      const t = i / 40, it = 1 - t, jx = (rnd() - .5) * .05, jy = (rnd() - .5) * .05;
+      const px = it * it * (gx + .95) + 2 * it * t * .5 + t * t * (wx - .45) + jx, py = it * it * -.1 + 2 * it * t * -.7 + t * t * (wy - .02) + jy;
+      glowAt(fg, C + px * R, C + py * R, 0, R * (.09 - .06 * t), mixC([255, 150, 90], [255, 240, 220], t), .22);
+    }
+    put(fg, await paint(S, R, diskBrush(N, tilt, .32, .08, .5), wx, wy));
+    for (const sd of [-1, 1]) spikes(fg, C + wx * R, C + wy * R, R * 1.2, 1, [170, 200, 255], .35, R * .025, tilt + sd * Math.PI / 2);   // джеты
+    const wr = Math.round(R * .08);
+    put(fg, await paint(wr * 2, wr, discBrush(N, wr, wd, { cells: 4, contrast: .01, faculae: 0 })), C + wx * R - wr, C + wy * R - wr, 'source-over');
+    glowAt(fg, C + wx * R, C + wy * R, 0, R * .35, wd[2], .7);
+  } else {   // пульсар: волокнистая туманность и тор позади, быстрые мягкие лучи спереди
+    const col = [176, 204, 255];
+    glowAt(bg, C, C, 0, R * 2.3, [140, 150, 255], .14);
+    put(bg, await paint(S, R, windNebula(N)));
+    bg.save(); bg.translate(C, C); bg.scale(1, .42);
+    const ring = bg.createRadialGradient(0, 0, R * .55, 0, 0, R * 1.05);
+    ring.addColorStop(0, rgba(col, 0)); ring.addColorStop(.5, rgba(col, .35)); ring.addColorStop(1, rgba(col, 0));
+    bg.fillStyle = ring; bg.beginPath(); bg.arc(0, 0, R * 1.05, 0, Math.PI * 2); bg.fill();
+    bg.restore();
+    for (const [w, a] of [[.36, .12], [.2, .22], [.08, .45]])   // лучи: мягкие края из нескольких слоёв
+      for (const sd of [-1, 1]) {
+        const lg = fg.createLinearGradient(C, C, C + sd * R * 3.3, C);
+        lg.addColorStop(0, rgba(col, a)); lg.addColorStop(1, rgba(col, 0));
+        fg.fillStyle = lg;
+        fg.beginPath(); fg.moveTo(C, C - R * .02); fg.lineTo(C + sd * R * 3.3, C - R * w); fg.lineTo(C + sd * R * 3.3, C + R * w); fg.lineTo(C, C + R * .02); fg.closePath(); fg.fill();
+      }
+    glowAt(fg, C, C, 0, R * 1.1, col, .5);
+    glowAt(fg, C, C, 0, R * .28, [255, 255, 255], .95);
+  }
+  // fixed: у двойной части стоят не в центре спрайта — слои нельзя вращать по отдельности, иначе разъедутся
+  return { back: mipChain(back), front: mipChain(front), pad, spin: kind === 'pulsar', fixed: kind === 'binary' };
+}
+
+// Созвездие: звёзды на ломаной с ответвлениями, как на звёздной карте; названия — из мира ИИ
+function makeConstellation() {
+  const n = 5 + Math.floor(Math.random() * 4), pts = [{ x: 0, y: 0, m: 1 }], edges = [];
+  let a = Math.random() * Math.PI * 2;
+  for (let i = 1; i < n; i++) {
+    const from = i > 2 && Math.random() < .3 ? Math.floor(Math.random() * (i - 1)) : i - 1;
+    a += (Math.random() - .5) * 2.2;
+    const st = .07 + Math.random() * .07;
+    pts.push({ x: pts[from].x + Math.cos(a) * st, y: pts[from].y + Math.sin(a) * st, m: .35 + Math.random() * .65 });
+    edges.push([from, i]);
+  }
+  const mx = pts.reduce((t, p) => t + p.x, 0) / n, my = pts.reduce((t, p) => t + p.y, 0) / n;
+  for (const p of pts) { p.x -= mx; p.y -= my; p.c = DYN[Math.floor(Math.random() * DYN.length)]; }   // и цвет звезды
+  let name;
+  do name = CONST_NAMES[Math.floor(Math.random() * CONST_NAMES.length)]; while (name === lastConst);
+  lastConst = name;
+  return { pts, edges, name };
+}
+
+async function prepareSun() {
+  sunBusy = true;
+  let kind;
+  do {
+    let x = Math.random();
+    kind = (SUN_KINDS.find(([, w]) => (x -= w) < 0) || SUN_KINDS[0])[0];
+  } while (kind === lastSunKind);
+  lastSunKind = kind;
+  sunSprite = kind === 'constellation'
+    ? { kind, con: makeConstellation() }
+    : { kind, ...(await makeStarSprite(kind, crypto.getRandomValues(new Uint32Array(1))[0])) };
+  sunBusy = false;
+}
+// границы тела в мировых единицах относительно его центра
+function sunExtent(s) {
+  if (s.spr.con) {
+    const P = s.spr.con.pts;
+    return [Math.min(...P.map(p => p.x)), Math.max(...P.map(p => p.x)), Math.min(...P.map(p => p.y)), Math.max(...P.map(p => p.y)) + .08];
+  }
+  const h = s.r * s.spr.pad;
+  return [-h, h, -h, h];
+}
+function updateSun(dt, now, cx, cy, still) {
+  if (!sun) {
+    if (still) return;
+    if (!sunSprite) { if (!sunBusy && !planetBusy && nebTex.length === NEB_PAL.length) prepareSun(); return; }
+    if (!nextSun) nextSun = now + 15000 + Math.random() * 10000;
+    if (now < nextSun) return;
+    // яркие звёзды уходят только вниз — сверху они засвечивали бы заголовок; созвездия тусклые, им можно везде
+    const lane = pickLane(planet ? planet.q : -1, sunSprite.con ? undefined : [0, 1]);
+    const d = sunSprite.con ? .6 + Math.random() * .2 : .55 + Math.random() * .25;
+    sun = { spr: sunSprite, q: lane.q, x: Math.cos(lane.an) * d, y: Math.sin(lane.an) * d * .75, z: 6, r: SUN_R[sunSprite.kind] || 0, rot: Math.random() * Math.PI * 2 };
+    sunSprite = null;
+  }
+  // впятеро медленнее планеты: при поиске идей пролетает примерно за пять бросков
+  sun.z -= dt * 0.025 * (1 + warp * 14) * calm;
+  const k = F / sun.z, [x0, x1, y0, y1] = sunExtent(sun);
+  if (sun.z < 0.1 || cx + (sun.x + x1) * k < 0 || cx + (sun.x + x0) * k > W || cy + (sun.y + y1) * k < 0 || cy + (sun.y + y0) * k > H) {
+    sun = null; nextSun = now + 30000 + Math.random() * 40000;
+  }
+}
+function drawSun(cx, cy, now) {
+  const s = sun, k = F / s.z, op = smooth(6, 5.2, s.z);
+  if (s.spr.con) { drawConstellation(s, cx, cy, k, op); return; }
+  const half = s.r * k * s.spr.pad, size = half * 2;
+  ctx.save();
+  ctx.translate(cx + s.x * k, cy + s.y * k);
+  if (s.spr.fixed) ctx.rotate(s.rot);   // двойная: случайный поворот всей системы целиком
+  // задний слой — корона или туманность: у одиночной звезды медленно поворачивается и «дышит»
+  ctx.save();
+  if (!s.spr.fixed) {
+    const breath = 1 + 0.025 * Math.sin(now * 0.0011 + s.rot);
+    ctx.rotate(s.rot + now * 0.00004); ctx.scale(breath, breath);
+  }
+  ctx.globalAlpha = op;
+  ctx.drawImage(pickMip(s.spr.back, size), -half, -half, size, size);
+  ctx.restore();
+  // передний слой — диск и лучи; у пульсара лучи вращаются и мерцают
+  if (s.spr.spin) ctx.rotate(s.rot + now * 0.0007);
+  ctx.globalAlpha = op * (s.spr.spin ? 0.82 + 0.18 * Math.sin(now * 0.005) : 1);
+  ctx.drawImage(pickMip(s.spr.front, size), -half, -half, size, size);
+  ctx.restore();
+}
+function drawConstellation(s, cx, cy, k, op) {
+  const c = s.spr.con, P = c.pts.map(p => [cx + (s.x + p.x) * k, cy + (s.y + p.y) * k, p.m, p.c]);
+  const grow = Math.min(3, 1 / s.z);   // ближе — крупнее, но звёзды остаются точками
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = `rgba(170,196,255,${(.34 * op).toFixed(3)})`;
+  ctx.beginPath();
+  for (const [a, b] of c.edges) { ctx.moveTo(P[a][0], P[a][1]); ctx.lineTo(P[b][0], P[b][1]); }
+  ctx.stroke();
+  for (const [x, y, m, col] of P) {
+    const r = (0.8 + m * 1.4) * (1 + grow * .6);
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r * 5);
+    g.addColorStop(0, `rgba(${col},${(.55 * op * m).toFixed(3)})`); g.addColorStop(1, `rgba(${col},0)`);
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 5, 0, 6.2832); ctx.fill();
+    if (m > .85) {   // у самых ярких — крошечные лучи
+      ctx.strokeStyle = `rgba(${col},${(.45 * op).toFixed(3)})`; ctx.lineWidth = .7;
+      ctx.beginPath(); ctx.moveTo(x - r * 7, y); ctx.lineTo(x + r * 7, y); ctx.moveTo(x, y - r * 7); ctx.lineTo(x, y + r * 7); ctx.stroke();
+    }
+    ctx.fillStyle = `rgba(244,248,255,${op.toFixed(3)})`; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+  }
+  // подпись, как на звёздной карте
+  ctx.font = `${Math.round(10 + grow * 3)}px ${SERIF}`;
+  if ('letterSpacing' in ctx) ctx.letterSpacing = '3px';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = `rgba(170,196,255,${(.5 * op).toFixed(3)})`;
+  ctx.fillText(c.name.toUpperCase(), P.reduce((t, p) => t + p[0], 0) / P.length, Math.max(...P.map(p => p[1])) + 18 + grow * 4);
+  ctx.textAlign = 'start';
+  if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+}
+
+function drawStar(p, cx, cy, v) {
+  const near = 1 - p.z, sx = p.sx, sy = p.sy;
+  const alpha = (Math.min(1, near * 1.4) * p.a).toFixed(3);
+  if (warp > 0.04) {
+    // хвост луча — к центру, длина ограничена; к хвосту цвет уходит в фиолетовый
+    const pz = Math.min(1, p.z + v * 6);
+    let tx = cx + p.x / pz * F - sx, ty = cy + p.y / pz * F - sy;
+    const len = Math.hypot(tx, ty), max = 30 + 150 * warp;
+    if (len > max) { tx *= max / len; ty *= max / len; }
+    const g = ctx.createLinearGradient(sx + tx, sy + ty, sx, sy);
+    g.addColorStop(0, 'rgba(150,120,255,0)'); g.addColorStop(1, `rgba(${p.c},${alpha})`);
+    ctx.strokeStyle = g;
+    ctx.lineWidth = 0.4 + near * 1.2;
+    ctx.beginPath();
+    ctx.moveTo(sx + tx, sy + ty);
+    ctx.lineTo(sx, sy);
+    ctx.stroke();
+  } else {
+    ctx.fillStyle = `rgba(${p.c},${alpha})`;
+    ctx.beginPath();
+    ctx.arc(sx, sy, 0.3 + near * 1.3, 0, 6.2832);
+    ctx.fill();
+  }
+}
+
+let lastNow = 0;
+function tick(now) {
+  const dt = Math.min(0.1, Math.max(0, (now - lastNow) / 1000));   // после скрытой вкладки — без рывка
+  lastNow = now;
+  if (!document.hidden && W) {
+    ctx.clearRect(0, 0, W, H);
+    const cx = VX, cy = VY;   // звёзды, туманность и планеты летят из точки схода
+    const still = reduceMotion.matches;
+    warp += ((spinning && !still ? 1 : 0) - warp) * (spinning ? 0.05 : 0.03);
+    const calmTo = reading ? 0.55 : 1;
+    calm += (calmTo - calm) * (calmTo > calm ? 0.1 : 0.025);
+    const v = still ? 0 : (0.0007 + warp * 0.022) * calm;
+    flyNebula(dt, cx, cy, still);
+    if (warp > 0.01) {   // свет в точке схода во время прыжка
+      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H) * 0.5);
+      g.addColorStop(0, `rgba(176,160,255,${(warp * 0.2).toFixed(3)})`);
+      g.addColorStop(1, 'rgba(176,160,255,0)');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    }
+    ctx.lineCap = 'round';
+    // планета и светило — от дальнего к ближнему; частицы-звёзды встают между ними по глубине
+    updatePlanet(dt, now, cx, cy, still);
+    updateSun(dt, now, cx, cy, still);
+    const bodies = [];
+    if (planet) bodies.push({ z: planet.z, draw: () => drawPlanet(cx, cy) });
+    if (sun) bodies.push({ z: sun.z, draw: () => drawSun(cx, cy, now) });
+    bodies.sort((a, b) => b.z - a.z);
+    const layers = bodies.map(() => []);   // layers[i] — частицы ближе тела i, но дальше следующего
+    for (const p of stars) {
+      p.z -= v;
+      if (p.z <= 0.02) spawn(p, false);
+      p.sx = cx + p.x / p.z * F; p.sy = cy + p.y / p.z * F;
+      if (p.sx < -50 || p.sx > W + 50 || p.sy < -50 || p.sy > H + 50) { spawn(p, false); continue; }
+      let li = -1;
+      for (let i = 0; i < bodies.length; i++) if (p.z < bodies[i].z) li = i;
+      if (li < 0) drawStar(p, cx, cy, v); else layers[li].push(p);
+    }
+    bodies.forEach((body, i) => { body.draw(); for (const p of layers[i]) drawStar(p, cx, cy, v); });
+    drawMeteor(now, still);
+  }
+  requestAnimationFrame(tick);
+}
+
+// ——— Управление ———
+spinBtn.onclick = spin;
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && openSheet) { closeSheets(); return; }
+  if (e.code !== 'Space' && e.key !== 'Enter') return;
+  if (openSheet) return;   // в открытой панели пробел и Enter — для её кнопок
+  if (e.target.closest && e.target.closest('button, summary, input, textarea, a, select')) return;
+  e.preventDefault();
+  spin();
+});
+addEventListener('resize', resize);
+
+// ——— Старт ———
+// из файла на диске папка сама не открывает index.html — ссылки выбора языка ведут прямо на него
+if (location.protocol === 'file:') for (const a of document.querySelectorAll('.langs a')) a.href = a.href.replace(/\/$/, '/index.html');
+updateFooter();
+syncSound();
+syncControls();
+updateSpinState();
+resize();
+buildSky();
+renderList();
+openShared();
+addEventListener('hashchange', openShared);
+requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
