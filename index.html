@@ -5,10 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI_Rulet</title>
 <meta name="description" content="AI_Rulet — рулетка идей для разработки AI-проектов">
+<meta name="theme-color" content="#03040a">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3CradialGradient id='g'%3E%3Cstop offset='0' stop-color='%23dbe7ff' stop-opacity='.85'/%3E%3Cstop offset='.4' stop-color='%239cc2ff' stop-opacity='.35'/%3E%3Cstop offset='1' stop-color='%239cc2ff' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='%2305071a'/%3E%3Cpath d='M9 53L21 40L33 47L44 21L56 35' fill='none' stroke='%238fb4f5' stroke-opacity='.9' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cg fill='%23c4d8ff'%3E%3Ccircle cx='9' cy='53' r='4.4'/%3E%3Ccircle cx='21' cy='40' r='4.6'/%3E%3Ccircle cx='33' cy='47' r='4.2'/%3E%3Ccircle cx='56' cy='35' r='4.4'/%3E%3C/g%3E%3Ccircle cx='44' cy='21' r='13' fill='url%28%23g%29'/%3E%3Cpath d='M44 6l2.4 12.6L59 21l-12.6 2.4L44 36l-2.4-12.6L29 21l12.6-2.4z' fill='%23eef3ff'/%3E%3Ccircle cx='44' cy='21' r='5' fill='%23fff'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AI_Rulet">
+<meta property="og:title" content="AI_Rulet — рулетка идей для AI-проектов">
+<meta property="og:description" content="1024 идеи проектов с ИИ и 706 320 сочетаний в «Миксе»: описание, стек и путь к прототипу. Работает без интернета.">
+<meta property="og:url" content="https://vergiley.github.io/AI_Rulet/">
+<meta property="og:locale" content="ru_RU">
+<meta name="twitter:card" content="summary">
 <style>
 :root{
   --serif:"Palatino Linotype","Book Antiqua",Palatino,"URW Palladio L",Georgia,"Times New Roman",serif;
-  --bg:#03040a; --bg2:#0b1028; --ink:#e7ecff; --ink-dim:#9ba5c9; --ink-faint:#5d6688;
+  --bg:#03040a; --bg2:#0b1028; --ink:#e7ecff; --ink-dim:#9ba5c9; --ink-faint:#7c86aa;
   --acc:#9cc2ff; --acc-hi:#eef3ff; --acc-lo:#4b5ea8; --line:rgba(156,194,255,.20);
   --card:rgba(10,14,34,.55); --glow:170,200,255;
   color-scheme:dark;
@@ -200,6 +209,8 @@ header.top{text-align:center; padding-top:22px; position:relative}
 .trial{margin:18px 0 0; padding:12px 16px; border-left:2px solid var(--acc); background:rgba(var(--glow),.06); font-style:italic}
 .trial b{font-style:normal; font-weight:400; letter-spacing:.18em; text-transform:uppercase; font-size:12px; color:var(--acc); display:block; margin-bottom:2px}
 .card-actions{display:flex; flex-wrap:wrap; gap:10px; margin-top:22px}
+.card-ask{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:12px}
+.card-ask > span{color:var(--ink-dim); font-style:italic; font-size:14px; margin-right:2px}
 .ghost{
   font-size:14px; padding:8px 16px; cursor:pointer; background:transparent; border:1px solid var(--line);
   color:var(--ink-dim); border-radius:2px; transition:border-color .25s, color .25s;
@@ -330,8 +341,8 @@ footer{margin-top:40px; text-align:center; color:var(--ink-faint); font-size:13p
     </section>
 
     <div class="actions">
-      <button id="spinBtn" class="spin" type="button">Найти</button>
-      <p class="hint" id="hint">Можно клавишей Пробел или Enter</p>
+      <button id="spinBtn" class="spin" type="button" disabled>Найти</button>
+      <p class="hint" id="hint">Загружаю идеи…</p>
     </div>
 
     <article id="card" class="card" aria-live="polite">
@@ -383,7 +394,8 @@ footer{margin-top:40px; text-align:center; color:var(--ink-faint); font-size:13p
       <li>Нажми «Найти» или клавишу <kbd>Пробел</kbd> / <kbd>Enter</kbd>. Около трёх секунд идёт поиск, затем идея встаёт в центр.</li>
       <li>Ниже появится карточка идеи — прочитай, подходит ли.</li>
       <li>«↻&nbsp;Найти ещё» — следующая идея, «⧉&nbsp;Скопировать» — карточка в буфер обмена в формате Markdown, «✧&nbsp;В&nbsp;созвездие» — сохранить идею.</li>
-      <li>«↗&nbsp;Разбор в&nbsp;Google» откроет в новой вкладке режим ИИ в Google (Gemini) с текстом идеи и просьбой оценить её: реалистичность, аналоги, риски, с чего начать. Нужен интернет; режим ИИ доступен не во всех странах.</li>
+      <li>«⤴&nbsp;Поделиться» — ссылка на эту идею: на телефоне откроется меню «Поделиться», на компьютере ссылка скопируется. Кто откроет ссылку, увидит ту же карточку.</li>
+      <li>«Разобрать с ИИ: ↗&nbsp;Google, ↗&nbsp;ChatGPT, ↗&nbsp;Claude» — откроет в новой вкладке выбранный сервис (у Google — режим ИИ на Gemini) с текстом идеи и просьбой оценить её: реалистичность, аналоги, риски, с чего начать. Нужен интернет; режим ИИ в Google доступен не во всех странах, Claude попросит войти в аккаунт.</li>
     </ol>
 
     <h3>Что в карточке</h3>
@@ -413,7 +425,7 @@ footer{margin-top:40px; text-align:center; color:var(--ink-faint); font-size:13p
     <p><kbd>Esc</kbd> закрывает открытую панель.</p>
 
     <h3>Где хранятся данные</h3>
-    <p>Приложение — один файл: работает без интернета и само ничего никуда не отправляет. Текст идеи уходит в Google, только когда ты сам нажимаешь «Разбор в&nbsp;Google». Хроника, созвездие, пройденная часть колоды и настройки хранятся только в этом браузере. Если очистить данные сайта или открыть файл в другом браузере, всё начнётся с чистого листа.</p>
+    <p>Приложение — один файл: работает без интернета и само ничего никуда не отправляет. Текст идеи уходит во внешний сервис, только когда ты сам нажимаешь одну из ссылок «Разобрать с ИИ»; ссылка «Поделиться» содержит лишь короткий код идеи. Хроника, созвездие, пройденная часть колоды и настройки хранятся только в этом браузере. Если очистить данные сайта или открыть файл в другом браузере, всё начнётся с чистого листа.</p>
 
     <p class="fine">Фон — живой космос: звёзды, туманности, планеты и созвездия с именами из мира ИИ. Пока читаешь карточку, он приглушается, чтобы не отвлекать.</p>
   </div>
@@ -1735,18 +1747,36 @@ let lastMix = { domain: '', tech: '' };
 
 function buildMix(fresh) {
   // при настоящем броске сфера и техника не повторяют прошлый раз
-  let di, t;
+  let di, ti;
   do di = rand(DOMAINS.length); while (fresh && DOMAINS[di][0] === lastMix.domain);
   const techs = MIX_TECHS[di];
-  do t = pick(techs); while (fresh && techs.length > 1 && t[0] === lastMix.tech);
-  if (fresh) lastMix = { domain: DOMAINS[di][0], tech: t[0] };
-  const [tech, stack, , how, challenge] = t, [domain, , who, why] = DOMAINS[di];
+  do ti = rand(techs.length); while (fresh && techs.length > 1 && techs[ti][0] === lastMix.tech);
+  if (fresh) lastMix = { domain: DOMAINS[di][0], tech: techs[ti][0] };
+  return mixFrom(di, ti, rand(DOMAINS[di][2].length), rand(PROBLEMS.length));
+}
+// «Микс» по номерам сферы, техники, персоны и задачи — их же хранит ссылка на идею
+function mixFrom(di, ti, wi, pi) {
+  const [tech, stack, , how, challenge] = MIX_TECHS[di][ti], [domain, , who, why] = DOMAINS[di];
   // абзац: почему важно в сфере → как работает → кому пригодится и что даёт → главный вызов
   return {
     title: cap(tech) + ' для ' + domain,
-    desc: `${why} ${how} Пригодится ${pick(who)}: решение ${pick(PROBLEMS)}. Главный вызов — ${challenge}.`,
-    stack, cat: 'mix'
+    desc: `${why} ${how} Пригодится ${who[wi]}: решение ${PROBLEMS[pi]}. Главный вызов — ${challenge}.`,
+    stack, cat: 'mix', mix: [di, ti, wi, pi]
   };
+}
+// Короткий код идеи для ссылки: «rag.17» — область и номер идеи в ней, «mix.12.3.4.40» — номера частей «Микса»
+const CODE = new Map();
+for (const c of CATEGORIES) c.list.forEach((idea, i) => CODE.set(keyOf(idea), c.id + '.' + (i + 1)));
+const codeOf = idea => idea.cat === 'mix' ? (Array.isArray(idea.mix) ? 'mix.' + idea.mix.join('.') : null) : CODE.get(keyOf(idea)) || null;
+function ideaFromCode(code) {
+  const p = code.split('.'), n = p.slice(1).map(Number);
+  if (!n.length || !n.every(Number.isInteger)) return null;
+  if (p[0] === 'mix') {
+    const [di, ti, wi, pi] = n;
+    return n.length === 4 && DOMAINS[di] && MIX_TECHS[di][ti] && DOMAINS[di][2][wi] && PROBLEMS[pi] ? mixFrom(di, ti, wi, pi) : null;
+  }
+  const c = Object.prototype.hasOwnProperty.call(CAT, p[0]) ? CAT[p[0]] : null;
+  return c && n.length === 1 && c.list[n[0] - 1] || null;
 }
 
 // ——— Хранилище (может быть недоступно на file://) ———
@@ -1929,11 +1959,27 @@ function land(idea) {
   }
   updateSpinState();
   updateFooter();
-  state.history = [idea, ...state.history.filter(h => keyOf(h) !== keyOf(idea))].slice(0, 20);
-  persist();
+  remember(idea);
   renderCard(idea);
   syncReading();
+}
+function remember(idea) {
+  state.history = [idea, ...state.history.filter(h => keyOf(h) !== keyOf(idea))].slice(0, 20);
+  persist();
   if (state.tab === 'history') renderList();
+}
+// идея по ссылке «…#rag.17»: сразу в центре и в карточке; код из адреса убирается, чтобы перезагрузка вернула маяк
+function openShared() {
+  const code = decodeURIComponent(location.hash.slice(1));
+  if (!code || spinning) return;
+  window.history.replaceState(null, '', location.pathname + location.search);
+  const idea = ideaFromCode(code);
+  if (!idea) { toast('Такой идеи нет — ссылка устарела'); return; }
+  closeSheets(true);
+  showIdea(idea);
+  remember(idea);
+  renderCard(idea);
+  syncReading();
 }
 
 // ——— Карточка идеи ———
@@ -1984,23 +2030,48 @@ function renderCard(idea) {
   const copy = h('button', 'ghost', '⧉ Скопировать'); copy.type = 'button'; copy.onclick = () => copyText(toMd(idea));
   const fav = h('button', 'ghost', isFav(idea) ? '✦ В созвездии' : '✧ В созвездие'); fav.type = 'button';
   fav.onclick = () => { toggleFav(idea); fav.textContent = isFav(idea) ? '✦ В созвездии' : '✧ В созвездие'; };
-  const ask = h('a', 'ghost', '↗ Разбор в Google');
-  ask.href = askUrl(idea); ask.target = '_blank'; ask.rel = 'noopener noreferrer';
-  ask.title = 'Откроет режим ИИ в Google (Gemini) с текстом этой идеи';
-  acts.append(again, copy, fav, ask);
-  cardEl.appendChild(acts);
+  const share = h('button', 'ghost', '⤴ Поделиться'); share.type = 'button'; share.onclick = () => shareIdea(idea);
+  acts.append(again, copy, fav, share);
+  cardEl.append(acts, askLinks(idea));
 
   cardEl.classList.remove('show');
   void cardEl.offsetWidth;
   cardEl.classList.add('show');
 }
-// ссылка на режим ИИ в Google (Gemini): в запросе — сама идея и просьба её разобрать
-function askUrl(idea) {
-  const q = `Разбери идею проекта с ИИ: «${idea.title}». ${idea.desc} Предполагаемый стек: ${idea.stack}.` +
+// Разбор идеи во внешнем ИИ-сервисе: в запросе — сама идея и просьба её разобрать.
+// Ссылки с готовым запросом сервисы официально не описывают; форматы ChatGPT и Claude пользователь проверил вручную.
+// Google: udm=50 — режим ИИ на Gemini
+const ASK = {
+  google: { name: 'Google', hint: 'режим ИИ в Google (Gemini)', url: 'https://www.google.com/search?udm=50&q=' },
+  chatgpt: { name: 'ChatGPT', url: 'https://chat.openai.com/?q=' },   // без model — последняя доступная модель
+  claude: { name: 'Claude', url: 'https://claude.ai/new?q=' }
+};
+function askLinks(idea) {
+  const row = h('div', 'card-ask'), q = encodeURIComponent(askText(idea));
+  row.appendChild(h('span', null, 'Разобрать с ИИ:'));
+  for (const a of Object.values(ASK)) {
+    const l = h('a', 'ghost', '↗ ' + a.name);
+    l.href = a.url + q; l.target = '_blank'; l.rel = 'noopener noreferrer';
+    l.title = `Откроет ${a.hint || a.name} с текстом этой идеи`;
+    row.appendChild(l);
+  }
+  return row;
+}
+// ссылка на сам сайт с кодом идеи; из файла на диске — на опубликованную версию
+const SITE = /^https?:/.test(location.protocol) ? location.origin + location.pathname : 'https://vergiley.github.io/AI_Rulet/';
+function linkOf(idea) { const c = codeOf(idea); return SITE + (c ? '#' + c : ''); }
+function shareIdea(idea) {
+  const url = linkOf(idea);
+  // системное меню «Поделиться» — на телефоне; на компьютере ссылка просто копируется
+  if (navigator.share && matchMedia('(pointer: coarse)').matches)
+    navigator.share({ title: idea.title, text: idea.title + ' — идея из AI_Rulet', url }).catch(() => {});
+  else copyText(url, 'Ссылка скопирована');
+}
+function askText(idea) {
+  return `Разбери идею проекта с ИИ: «${idea.title}». ${idea.desc} Предполагаемый стек: ${idea.stack}.` +
     // «Возвраты товаров…» → «возвраты товаров…», но аббревиатуры вроде LLM и AR остаются
     (idea.cat !== 'mix' ? ` Дополнительное усложнение: ${idea.twist.replace(/^[А-ЯЁA-Z](?=[а-яёa-z])/, c => c.toLowerCase())}.` : '') +
     ' Оцени, реально ли сделать прототип силами одного-двух разработчиков, какие есть готовые решения и аналоги, главные риски и с чего начать.';
-  return 'https://www.google.com/search?udm=50&q=' + encodeURIComponent(q);
 }
 function toMd(idea) {
   const c = catOf(idea);
@@ -2018,15 +2089,15 @@ function toast(msg) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toastEl.classList.remove('on'), 1800);
 }
-function copyText(text) {
+function copyText(text, done = 'Идея скопирована') {
   const fallback = () => {
     const ta = h('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
     document.body.appendChild(ta); ta.select();
     let ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
     ta.remove();
-    toast(ok ? 'Идея скопирована' : 'Не удалось скопировать');
+    toast(ok ? done : 'Не удалось скопировать');
   };
-  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(() => toast('Идея скопирована'), fallback);
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(() => toast(done), fallback);
   else fallback();
 }
 
@@ -2618,10 +2689,12 @@ function setAnim(v) {
 const veil = $('#veil'), sheets = { set: $('#setSheet'), chron: $('#chronSheet'), help: $('#helpSheet') };
 const sheetBtns = { set: $('#setBtn'), chron: $('#chronBtn'), help: $('#helpBtn') };
 let openSheet = null;
+const wrapEl = $('.wrap');   // пока открыта панель, страница под ней недоступна для фокуса и экранного диктора
 function showSheet(name) {
   if (openSheet === name) { closeSheets(); return; }
   closeSheets(true);
   openSheet = name;
+  wrapEl.inert = true;
   if (name === 'chron') renderList();
   sheets[name].classList.add('open');
   veil.classList.add('on');
@@ -2635,6 +2708,7 @@ function closeSheets(silent) {
   sheets[name].classList.remove('open');
   veil.classList.remove('on');
   sheetBtns[name].setAttribute('aria-expanded', 'false');
+  wrapEl.inert = false;
   if (!silent) sheetBtns[name].focus();
 }
 for (const name in sheetBtns) sheetBtns[name].onclick = () => showSheet(name);
@@ -2916,7 +2990,7 @@ document.body.appendChild(vhProbe);
 function resize() {
   const w = innerWidth, h = Math.max(innerHeight, vhProbe.offsetHeight);
   if (w === W && h === H) return;   // изменилась только видимая высота — космос не трогаем
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const dpr = Math.min(1.5, window.devicePixelRatio || 1);   // звёзды перерисовываются каждый кадр: 1,5 вместо 2 — на «ретине» на 44% меньше пикселей
   W = w; H = h; F = Math.max(W, H) * 0.5;
   cv.width = W * dpr; cv.height = H * dpr;
   cv.style.width = W + 'px'; cv.style.height = H + 'px';
@@ -3606,6 +3680,8 @@ updateSpinState();
 resize();
 buildSky();
 renderList();
+openShared();
+addEventListener('hashchange', openShared);
 requestAnimationFrame(tick);
 })();
 </script>
