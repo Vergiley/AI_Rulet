@@ -3,6 +3,7 @@ const T = {
   mixName: 'Mix', mixEp: 'Singularity', mixTitle: '{tech} for {domain}',
   badLink: 'No such idea — the link is out of date',
   stack: 'Stack', format: 'Format', trajectory: 'Path to prototype', anomaly: 'Anomaly', mdSteps: 'MVP steps',
+  colon: ': ', sentSep: ' ', latinGap: false,   // двоеточие после подписи, разделитель предложений «Микса», пробел у латиницы в заголовке «Микса»
   again: '↻ Find another', copy: '⧉ Copy', fav: '✧ Add to constellation', faved: '✦ In constellation', share: '⤴ Share',
   askLabel: 'Analyze with AI:', askTitle: 'Opens {name} with this idea', askGoogle: 'AI Mode in Google (Gemini)',
   askPrompt: 'Review this AI project idea: “{title}”. {desc} Proposed stack: {stack}.{twist} Assess whether one or two developers can realistically build a prototype, what ready-made solutions and alternatives exist, the main risks, and where to start.',

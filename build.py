@@ -15,15 +15,16 @@ import json, os, re, sys
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 SITE = 'https://vergiley.github.io/AI_Rulet/'
-# код, название на своём языке, папка страницы, направление письма, локаль превью ссылки
+# код (папка в src/lang), название на своём языке, папка страницы, направление письма, локаль превью ссылки,
+# тег языка для lang, hreflang и Intl (у китайского — упрощённое письмо)
 LANGS = [
-    ('ru', 'Русский', '', 'ltr', 'ru_RU'),
-    ('en', 'English', 'en/', 'ltr', 'en_US'),
-    ('zh', '中文', 'zh/', 'ltr', 'zh_CN'),
-    ('hi', 'हिन्दी', 'hi/', 'ltr', 'hi_IN'),
-    ('ar', 'العربية', 'ar/', 'rtl', 'ar_AR'),
-    ('fa', 'فارسی', 'fa/', 'rtl', 'fa_IR'),
-    ('he', 'עברית', 'he/', 'rtl', 'he_IL'),
+    ('ru', 'Русский', '', 'ltr', 'ru_RU', 'ru'),
+    ('en', 'English', 'en/', 'ltr', 'en_US', 'en'),
+    ('zh', '中文', 'zh/', 'ltr', 'zh_CN', 'zh-Hans'),
+    ('hi', 'हिन्दी', 'hi/', 'ltr', 'hi_IN', 'hi'),
+    ('ar', 'العربية', 'ar/', 'rtl', 'ar_AR', 'ar'),
+    ('fa', 'فارسی', 'fa/', 'rtl', 'fa_IR', 'fa'),
+    ('he', 'עברית', 'he/', 'rtl', 'he_IL', 'he'),
 ]
 FILES = ['strings.js', 'page.json', 'help.html', 'catalog.js', 'mix.js']
 
@@ -84,11 +85,11 @@ def rel(from_dir, to_dir):
 
 
 def build(lang, ready):
-    code, _, folder, direction, locale = lang
+    code, _, folder, direction, locale, tag = lang
     page = json.loads(read(f'src/lang/{code}/page.json'))
     s = read('src/template.html')
     # данные: строка языка, словарь, каталог, «Микс»
-    lang_line = f"const LANG = '{code}', PAGE_URL = '{SITE}{folder}';   // язык и адрес этой страницы — задаёт сборка\n"
+    lang_line = f"const LANG = '{tag}', PAGE_URL = '{SITE}{folder}';   // язык и адрес этой страницы — задаёт сборка\n"
     for token, value in [('/*@@LANG@@*/', lang_line),
                          ('/*@@STRINGS@@*/\n', read(f'src/lang/{code}/strings.js')),
                          ('/*@@CATALOG@@*/\n', read(f'src/lang/{code}/catalog.js')),
@@ -99,15 +100,15 @@ def build(lang, ready):
     # выбор языка и hreflang — только когда языков больше одного
     if len(ready) > 1:
         links = ''.join(
-            f'<a href="{rel(folder, l[2])}" hreflang="{l[0]}" lang="{l[0]}"' + (' aria-current="page"' if l[0] == code else '') + f'>{l[1]}</a>'
+            f'<a href="{rel(folder, l[2])}" hreflang="{l[5]}" lang="{l[5]}"' + (' aria-current="page"' if l[0] == code else '') + f'>{l[1]}</a>'
             for l in ready)
         nav = f'  <nav class="langs" aria-label="{page["lang_nav"]}">{links}</nav>\n'
-        alt = ''.join(f'<link rel="alternate" hreflang="{l[0]}" href="{SITE}{l[2]}">\n' for l in ready) + \
+        alt = ''.join(f'<link rel="alternate" hreflang="{l[5]}" href="{SITE}{l[2]}">\n' for l in ready) + \
               f'<link rel="alternate" hreflang="x-default" href="{SITE}">\n'
     else:
         nav = alt = ''
     s = s.replace('{{@langs}}', nav).replace('{{@hreflang}}', alt).replace('{{@help}}', read(f'src/lang/{code}/help.html'))
-    values = dict(page, lang=code, dir=direction, page_url=SITE + folder, locale=locale)
+    values = dict(page, lang=tag, dir=direction, page_url=SITE + folder, locale=locale)
     s = re.sub(r'\{\{(\w+)\}\}', lambda m: values[m.group(1)], s)
     left = re.findall(r'\{\{@?\w+\}\}|/\*@@\w+@@\*/', s)
     if left:

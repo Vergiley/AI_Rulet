@@ -285,6 +285,19 @@ a.ghost{display:inline-block; line-height:normal; text-decoration:none}
 .list-empty{color:var(--ink-faint); font-style:italic; padding:8px 0; margin:0}
 .list-tools{display:flex; gap:16px; margin-top:12px}
 
+/* Письменности без прописных и курсива: китайский, хинди, арабский, фарси, иврит. Курсив браузер подделывает наклоном,
+   широкая разрядка растаскивает иероглифы, а в деванагари и арабском письме рвёт лигатуры и связность букв.
+   Латиница остаётся антиквой, для своего письма — системные шрифты с засечками; в Windows у китайского нет
+   хорошей системной антиквы (SimSun мелким кеглем растровый), поэтому там — Microsoft YaHei */
+html:lang(zh){--serif:"Palatino Linotype","Book Antiqua",Palatino,"URW Palladio L",Georgia,"Noto Serif SC","Noto Serif CJK SC","Source Han Serif SC","Songti SC","Microsoft YaHei","PingFang SC",serif}
+html:lang(zh) body{line-height:1.7}
+html:lang(hi){--serif:"Palatino Linotype","Book Antiqua",Palatino,Georgia,"Noto Serif Devanagari","Kokila","Mangal","Nirmala UI",serif}
+html:lang(ar),html:lang(fa){--serif:"Palatino Linotype","Book Antiqua",Palatino,Georgia,"Noto Naskh Arabic","Amiri","Traditional Arabic","Times New Roman",serif}
+html:lang(he){--serif:"Palatino Linotype","Book Antiqua",Palatino,Georgia,"Noto Serif Hebrew","David","Frank Ruehl CLM","Times New Roman",serif}
+:lang(zh) *,:lang(hi) *,:lang(ar) *,:lang(fa) *,:lang(he) *{font-style:normal !important}
+:lang(zh) :is(.c-cat,.dec .cat,.won small,.spin,.card .meta,.card h3,.trial b,.sheet h2,.help h3,.tab){letter-spacing:.08em}
+:is(:lang(hi),:lang(ar),:lang(fa),:lang(he)) :is(.c-cat,.dec .cat,.won small,.spin,.card .meta,.card h3,.trial b,.sheet h2,.help h3,.tab){letter-spacing:0}
+:lang(zh) :is(.c-cat,.dec .cat,.won small){font-size:12px}
 .langs{display:flex; flex-wrap:wrap; justify-content:center; gap:6px 14px; margin:14px 0 0; font-size:14px}   /* выбор языка */
 .langs a{color:var(--ink-faint); text-decoration:none; padding:2px 0; border-bottom:1px solid transparent}
 .langs a:hover{color:var(--acc-hi); border-bottom-color:var(--line)}
@@ -418,6 +431,8 @@ const pick = arr => arr[rand(arr.length)];
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const lcFirst = s => s.replace(/^\p{Lu}(?=\p{Ll})/u, c => c.toLowerCase());   // «Возвраты…» → «возвраты…», но LLM и AR остаются
 const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (m, k) => k in o ? o[k] : m);
+// пробел между иероглифом и латиницей или цифрой там, где их склеила подстановка: «面向B2B 销售» → «面向 B2B 销售»
+const gapLatin = s => T.latinGap ? s.replace(/(\p{Script=Han})(?=[A-Za-z0-9])|([A-Za-z0-9])(?=\p{Script=Han})/gu, '$1$2 ') : s;
 
 // ——— База идей ———
 // кто есть кто: код идеи каталога («rag.17») или номера «Микса»; у совсем старых карточек — область и название
@@ -509,8 +524,8 @@ function mixFrom(di, ti, wi, pi, fi = -1, ai = -1, vi = 0) {
   const benefit = f ? t.gives[pi] : PROBLEMS[pi];   // у старых ссылок — общая фраза «что даёт», у новых — фраза самой техники
   // абзац: почему важно в сфере → как работает → в каком виде → кому пригодится и что даёт → главный вызов
   return {
-    title: fmt(T.mixTitle, { tech: cap(t.name), domain: d.name }),
-    desc: [d.why, t.how, f ? f.sentence : '', fmt(MIX_PHRASES[vi], { who: d.who[wi].text, pr: benefit, ch: t.challenge })].filter(Boolean).join(' '),
+    title: gapLatin(fmt(T.mixTitle, { tech: cap(t.name), domain: d.name })),
+    desc: [d.why, t.how, f ? f.sentence : '', fmt(MIX_PHRASES[vi], { who: d.who[wi].text, pr: benefit, ch: t.challenge })].filter(Boolean).join(T.sentSep),
     stack: f ? mergeStack(t.stack, f.add) : t.stack,
     format: f ? f.name : undefined, twist: a ? a.text : undefined,
     cat: 'mix', mix: f ? [di, ti, wi, pi, fi, ai, vi] : [di, ti, wi, pi]
@@ -795,9 +810,9 @@ function renderCard(idea) {
   cardEl.append(meta, h('h2', null, idea.title), h('p', 'desc', idea.desc));
 
   const tags = h('ul', 'tags'), stack = h('li');
-  stack.append(h('b', null, T.stack + ': '), document.createTextNode(idea.stack));
+  stack.append(h('b', null, T.stack + T.colon), document.createTextNode(idea.stack));
   tags.appendChild(stack);
-  if (idea.format) { const f = h('li'); f.append(h('b', null, T.format + ': '), document.createTextNode(idea.format)); tags.appendChild(f); }
+  if (idea.format) { const f = h('li'); f.append(h('b', null, T.format + T.colon), document.createTextNode(idea.format)); tags.appendChild(f); }
   cardEl.appendChild(tags);
 
   if (idea.cat !== 'mix') {   // у «Микса» вместо траектории — расширенное описание
@@ -859,9 +874,9 @@ function askText(idea) {
 }
 function toMd(idea) {
   const c = catOf(idea);
-  const head = `# ${idea.title}\n\n*${c.name}*\n\n${idea.desc}\n\n**${T.stack}:** ${idea.stack}\n` + (idea.format ? `**${T.format}:** ${idea.format}\n` : '');
-  const steps = idea.cat === 'mix' ? '' : `\n**${T.mdSteps}:**\n${stepsOf(idea).map((s, n) => `${n + 1}. ${s}`).join('\n')}\n`;
-  return head + steps + (idea.twist ? `\n**${T.anomaly}:** ${idea.twist}\n` : '');
+  const head = `# ${idea.title}\n\n*${c.name}*\n\n${idea.desc}\n\n**${T.stack}${T.colon.trim()}** ${idea.stack}\n` + (idea.format ? `**${T.format}${T.colon.trim()}** ${idea.format}\n` : '');
+  const steps = idea.cat === 'mix' ? '' : `\n**${T.mdSteps}${T.colon.trim()}**\n${stepsOf(idea).map((s, n) => `${n + 1}. ${s}`).join('\n')}\n`;
+  return head + steps + (idea.twist ? `\n**${T.anomaly}${T.colon.trim()}** ${idea.twist}\n` : '');
 }
 
 // ——— Буфер обмена, тост ———
