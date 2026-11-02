@@ -298,11 +298,10 @@ html:lang(he){--serif:"Palatino Linotype","Book Antiqua",Palatino,Georgia,"Noto 
 :lang(zh) :is(.c-cat,.dec .cat,.won small,.spin,.card .meta,.card h3,.trial b,.sheet h2,.help h3,.tab){letter-spacing:.08em}
 :is(:lang(hi),:lang(ar),:lang(fa),:lang(he)) :is(.c-cat,.dec .cat,.won small,.spin,.card .meta,.card h3,.trial b,.sheet h2,.help h3,.tab){letter-spacing:0}
 :lang(zh) :is(.c-cat,.dec .cat,.won small){font-size:12px}
-.langs{display:flex; flex-wrap:wrap; justify-content:center; gap:6px 14px; margin:14px 0 0; font-size:14px}   /* выбор языка */
+.langs{display:flex; flex-wrap:wrap; justify-content:center; gap:6px 14px; margin:40px 0 0; font-size:14px}   /* выбор языка */
 .langs a{color:var(--ink-faint); text-decoration:none; padding:2px 0; border-bottom:1px solid transparent}
 .langs a:hover{color:var(--acc-hi); border-bottom-color:var(--line)}
 .langs a[aria-current="page"]{color:var(--acc)}
-footer{margin-top:40px; text-align:center; color:var(--ink-faint); font-size:13px; font-style:italic}
 .toast{
   position:fixed; left:50%; bottom:26px; transform:translate(-50%,20px); opacity:0; pointer-events:none; z-index:30;
   padding:9px 18px; background:var(--card); border:1px solid var(--acc); color:var(--acc-hi); font-size:14px;
@@ -370,7 +369,6 @@ footer{margin-top:40px; text-align:center; color:var(--ink-faint); font-size:13p
 
   </main>
 
-  <footer id="footer"></footer>
 {{@langs}}</div>
 <div class="veil" id="veil"></div>
 <aside class="sheet" id="setSheet" role="dialog" aria-modal="true" aria-labelledby="setTitle">
@@ -758,7 +756,6 @@ function land(idea) {
     flareEl.classList.add('pop');
   }
   updateSpinState();
-  updateFooter();
   remember(idea);
   renderCard(idea);
   syncReading();
@@ -983,7 +980,6 @@ function onFilters() {
   syncControls();
   if (!spinning && anim().refill) anim().refill();
   updateSpinState();
-  updateFooter();
 }
 const combos = MIX_COMBOS;
 // склонение по числу: 1 идея, 2 идеи, 5 идей
@@ -992,10 +988,6 @@ const PR = new Intl.PluralRules(LANG);
 const plural = (n, key) => { const f = T.pl[key]; return f[PR.select(n)] || f.other; };
 const num = n => n >= T.groupFrom ? n.toLocaleString(LANG) : String(n);
 const count = (n, key) => num(n) + '\u00a0' + plural(n, key);   // число не отрывается от слова
-function updateFooter() {
-  const p = pool(), left = p.filter(i => !state.seen.has(keyOf(i))).length;
-  $('#footer').textContent = fmt(T.footer, { ideas: count(IDEAS.length, 'idea'), left: num(left), total: num(p.length), combos: count(combos, 'combo') });
-}
 
 // ——— Звук: по умолчанию выключен; «звёздная капля», когда ячейка проходит линию выбора ———
 const soundBtn = $('#soundBtn');
@@ -2476,7 +2468,6 @@ addEventListener('resize', resize);
 // ——— Старт ———
 // из файла на диске папка сама не открывает index.html — ссылки выбора языка ведут прямо на него
 if (location.protocol === 'file:') for (const a of document.querySelectorAll('.langs a')) a.href = a.href.replace(/\/$/, '/index.html');
-updateFooter();
 syncSound();
 syncControls();
 updateSpinState();

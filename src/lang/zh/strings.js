@@ -14,7 +14,6 @@ const T = {
   remove: '移除', removeFav: '从星图中移除', clearHistory: '清空航行日志', exportMd: '导出为 .md',
   mdTitle: 'AI_Rulet —— 创意星图', mdFile: 'AI_Rulet-星图.md',
   hintKeys: '也可以按空格键或 Enter 键', hintEmpty: '星空空空如也——请至少选择一个领域',
-  footer: '目录中有 {ideas} · 尚未抽到 {left}/{total} · 混搭共有 {combos}',
   soundOn: '声音已开启', soundOff: '声音已关闭',
   noise: '的一是不了人我在有他这为之大来以个中上们到说国和地也子时道出而要于就下得可你年生0123456789◇◆✦⋆∴≈≡░▒',   // знаки помех в «Расшифровке сигнала»
   constNames: ['神经元', '感知机', 'Transformer', '梯度', '张量', '嵌入', '注意力', '扩散',

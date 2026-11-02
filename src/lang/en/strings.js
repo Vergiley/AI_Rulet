@@ -14,7 +14,6 @@ const T = {
   remove: 'Remove', removeFav: 'Remove from the constellation', clearHistory: 'Clear the chronicle', exportMd: 'Export to .md',
   mdTitle: 'AI_Rulet — Constellation of ideas', mdFile: 'AI_Rulet-constellation.md',
   hintKeys: 'You can also press Space or Enter', hintEmpty: 'Space is empty — select at least one area',
-  footer: '{ideas} in the catalog · {left} of {total} not drawn yet · {combos} in the Mix',
   soundOn: 'Sound on', soundOff: 'Sound off',
   noise: 'abcdefghijklmnopqrstuvwxyz0123456789◇◆✦⋆∴≈≡░▒',   // знаки помех в «Расшифровке сигнала»
   constNames: ['Neuron', 'Perceptron', 'Transformer', 'Gradient', 'Tensor', 'Embedding', 'Attention', 'Diffusion',

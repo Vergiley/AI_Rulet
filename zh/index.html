@@ -302,11 +302,10 @@ html:lang(he){--serif:"Palatino Linotype","Book Antiqua",Palatino,Georgia,"Noto 
 :lang(zh) :is(.c-cat,.dec .cat,.won small,.spin,.card .meta,.card h3,.trial b,.sheet h2,.help h3,.tab){letter-spacing:.08em}
 :is(:lang(hi),:lang(ar),:lang(fa),:lang(he)) :is(.c-cat,.dec .cat,.won small,.spin,.card .meta,.card h3,.trial b,.sheet h2,.help h3,.tab){letter-spacing:0}
 :lang(zh) :is(.c-cat,.dec .cat,.won small){font-size:12px}
-.langs{display:flex; flex-wrap:wrap; justify-content:center; gap:6px 14px; margin:14px 0 0; font-size:14px}   /* выбор языка */
+.langs{display:flex; flex-wrap:wrap; justify-content:center; gap:6px 14px; margin:40px 0 0; font-size:14px}   /* выбор языка */
 .langs a{color:var(--ink-faint); text-decoration:none; padding:2px 0; border-bottom:1px solid transparent}
 .langs a:hover{color:var(--acc-hi); border-bottom-color:var(--line)}
 .langs a[aria-current="page"]{color:var(--acc)}
-footer{margin-top:40px; text-align:center; color:var(--ink-faint); font-size:13px; font-style:italic}
 .toast{
   position:fixed; left:50%; bottom:26px; transform:translate(-50%,20px); opacity:0; pointer-events:none; z-index:30;
   padding:9px 18px; background:var(--card); border:1px solid var(--acc); color:var(--acc-hi); font-size:14px;
@@ -374,7 +373,6 @@ footer{margin-top:40px; text-align:center; color:var(--ink-faint); font-size:13p
 
   </main>
 
-  <footer id="footer"></footer>
   <nav class="langs" aria-label="语言"><a href="../" hreflang="ru" lang="ru">Русский</a><a href="../en/" hreflang="en" lang="en">English</a><a href="../zh/" hreflang="zh-Hans" lang="zh-Hans" aria-current="page">中文</a></nav>
 </div>
 <div class="veil" id="veil"></div>
@@ -437,7 +435,7 @@ footer{margin-top:40px; text-align:center; color:var(--ink-faint); font-size:13p
     </dl>
 
     <h3>不重复</h3>
-    <p>在“目录”里，创意像从一副牌里发牌：每张只出现一次，直到整轮发完。之后重新洗牌，新一轮不会从上一轮最后抽到的创意开始。页面底部显示所选领域里还剩多少。“混搭”没有牌堆，但领域和技术不会与上一次重复。</p>
+    <p>在“目录”里，创意像从一副牌里发牌：每张只出现一次，直到整轮发完。之后重新洗牌，新一轮不会从上一轮最后抽到的创意开始。“混搭”没有牌堆，但领域和技术不会与上一次重复。</p>
 
     <h3>顶部按钮</h3>
     <dl class="icons">
@@ -476,7 +474,6 @@ const T = {
   remove: '移除', removeFav: '从星图中移除', clearHistory: '清空航行日志', exportMd: '导出为 .md',
   mdTitle: 'AI_Rulet —— 创意星图', mdFile: 'AI_Rulet-星图.md',
   hintKeys: '也可以按空格键或 Enter 键', hintEmpty: '星空空空如也——请至少选择一个领域',
-  footer: '目录中有 {ideas} · 尚未抽到 {left}/{total} · 混搭共有 {combos}',
   soundOn: '声音已开启', soundOff: '声音已关闭',
   noise: '的一是不了人我在有他这为之大来以个中上们到说国和地也子时道出而要于就下得可你年生0123456789◇◆✦⋆∴≈≡░▒',   // знаки помех в «Расшифровке сигнала»
   constNames: ['神经元', '感知机', 'Transformer', '梯度', '张量', '嵌入', '注意力', '扩散',
@@ -3851,7 +3848,6 @@ function land(idea) {
     flareEl.classList.add('pop');
   }
   updateSpinState();
-  updateFooter();
   remember(idea);
   renderCard(idea);
   syncReading();
@@ -4076,7 +4072,6 @@ function onFilters() {
   syncControls();
   if (!spinning && anim().refill) anim().refill();
   updateSpinState();
-  updateFooter();
 }
 const combos = MIX_COMBOS;
 // склонение по числу: 1 идея, 2 идеи, 5 идей
@@ -4085,10 +4080,6 @@ const PR = new Intl.PluralRules(LANG);
 const plural = (n, key) => { const f = T.pl[key]; return f[PR.select(n)] || f.other; };
 const num = n => n >= T.groupFrom ? n.toLocaleString(LANG) : String(n);
 const count = (n, key) => num(n) + '\u00a0' + plural(n, key);   // число не отрывается от слова
-function updateFooter() {
-  const p = pool(), left = p.filter(i => !state.seen.has(keyOf(i))).length;
-  $('#footer').textContent = fmt(T.footer, { ideas: count(IDEAS.length, 'idea'), left: num(left), total: num(p.length), combos: count(combos, 'combo') });
-}
 
 // ——— Звук: по умолчанию выключен; «звёздная капля», когда ячейка проходит линию выбора ———
 const soundBtn = $('#soundBtn');
@@ -5569,7 +5560,6 @@ addEventListener('resize', resize);
 // ——— Старт ———
 // из файла на диске папка сама не открывает index.html — ссылки выбора языка ведут прямо на него
 if (location.protocol === 'file:') for (const a of document.querySelectorAll('.langs a')) a.href = a.href.replace(/\/$/, '/index.html');
-updateFooter();
 syncSound();
 syncControls();
 updateSpinState();
