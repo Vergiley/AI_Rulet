@@ -107,7 +107,17 @@ def build(lang, ready):
               f'<link rel="alternate" hreflang="x-default" href="{SITE}">\n'
     else:
         nav = alt = ''
-    s = s.replace('{{@langs}}', nav).replace('{{@hreflang}}', alt).replace('{{@help}}', read(f'src/lang/{code}/help.html'))
+    # описание для поисковиков (schema.org): что это за страница, на каком языке, бесплатно, без установки
+    ld = {'@context': 'https://schema.org', '@type': 'WebApplication', 'name': 'AI_Rulet', 'url': SITE + folder,
+          'description': page['og_description'], 'inLanguage': tag, 'image': SITE + folder + 'og.jpg',
+          'applicationCategory': 'EducationalApplication', 'operatingSystem': 'Any', 'browserRequirements': 'Requires JavaScript',
+          'isAccessibleForFree': True, 'offers': {'@type': 'Offer', 'price': '0', 'priceCurrency': 'USD'},
+          'license': 'https://opensource.org/licenses/MIT'}
+    jsonld = '<script type="application/ld+json">' + json.dumps(ld, ensure_ascii=False).replace('</', '<\\/') + '</script>\n'
+    if not os.path.isfile(os.path.join(ROOT, folder, 'og.jpg')):
+        print(f'{code}: нет {folder}og.jpg — картинка превью (сделать: ai_rulet_tools/seo/make_og.py)')
+    s = s.replace('{{@langs}}', nav).replace('{{@hreflang}}', alt).replace('{{@jsonld}}', jsonld) \
+         .replace('{{@help}}', read(f'src/lang/{code}/help.html'))
     values = dict(page, lang=tag, dir=direction, page_url=SITE + folder, locale=locale)
     s = re.sub(r'\{\{(\w+)\}\}', lambda m: values[m.group(1)], s)
     left = re.findall(r'\{\{@?\w+\}\}|/\*@@\w+@@\*/', s)
@@ -129,6 +139,21 @@ def main():
         out, size = build(lang, ready)
         print(f'{lang[0]}: {os.path.relpath(out, ROOT)} — {size / 1024:.0f} КБ')
     open(os.path.join(ROOT, '.nojekyll'), 'a').close()   # GitHub Pages отдаёт файлы как есть, без Jekyll
+    write_sitemap(ready)
+
+
+def write_sitemap(ready):
+    """sitemap.xml со всеми языками (у каждой страницы — ссылки на её версии) и robots.txt со ссылкой на него"""
+    alts = ''.join(f'    <xhtml:link rel="alternate" hreflang="{l[5]}" href="{SITE}{l[2]}"/>\n' for l in ready) + \
+           f'    <xhtml:link rel="alternate" hreflang="x-default" href="{SITE}"/>\n'
+    urls = ''.join(f'  <url>\n    <loc>{SITE}{l[2]}</loc>\n{alts}  </url>\n' for l in ready)
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
+           f'{urls}</urlset>\n')
+    with open(os.path.join(ROOT, 'sitemap.xml'), 'w', encoding='utf-8', newline='\n') as f:
+        f.write(xml)
+    with open(os.path.join(ROOT, 'robots.txt'), 'w', encoding='utf-8', newline='\n') as f:
+        f.write(f'User-agent: *\nAllow: /\n\nSitemap: {SITE}sitemap.xml\n')
 
 
 if __name__ == '__main__':
