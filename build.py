@@ -14,7 +14,7 @@
 import json, os, re, sys
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-SITE = 'https://vergiley.github.io/AI_Rulet/'
+SITE = 'https://airulet.dev/'
 # код (папка в src/lang), название на своём языке, папка страницы, направление письма, локаль превью ссылки,
 # тег языка для lang, hreflang и Intl (у китайского — упрощённое письмо)
 LANGS = [
