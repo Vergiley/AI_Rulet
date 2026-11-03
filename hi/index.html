@@ -20,6 +20,7 @@
 <link rel="alternate" hreflang="hi" href="https://vergiley.github.io/AI_Rulet/hi/">
 <link rel="alternate" hreflang="ar" href="https://vergiley.github.io/AI_Rulet/ar/">
 <link rel="alternate" hreflang="fa" href="https://vergiley.github.io/AI_Rulet/fa/">
+<link rel="alternate" hreflang="he" href="https://vergiley.github.io/AI_Rulet/he/">
 <link rel="alternate" hreflang="x-default" href="https://vergiley.github.io/AI_Rulet/">
 <style>
 :root{
@@ -379,7 +380,7 @@ html:lang(fa) :is(.card ol,.help ol){list-style-type:persian}   /* в фарси
 
   </main>
 
-  <nav class="langs" aria-label="भाषा"><a href="../" hreflang="ru" lang="ru">Русский</a><a href="../en/" hreflang="en" lang="en">English</a><a href="../zh/" hreflang="zh-Hans" lang="zh-Hans">中文</a><a href="../hi/" hreflang="hi" lang="hi" aria-current="page">हिन्दी</a><a href="../ar/" hreflang="ar" lang="ar">العربية</a><a href="../fa/" hreflang="fa" lang="fa">فارسی</a></nav>
+  <nav class="langs" aria-label="भाषा"><a href="../" hreflang="ru" lang="ru">Русский</a><a href="../en/" hreflang="en" lang="en">English</a><a href="../zh/" hreflang="zh-Hans" lang="zh-Hans">中文</a><a href="../hi/" hreflang="hi" lang="hi" aria-current="page">हिन्दी</a><a href="../ar/" hreflang="ar" lang="ar">العربية</a><a href="../fa/" hreflang="fa" lang="fa">فارسی</a><a href="../he/" hreflang="he" lang="he">עברית</a></nav>
 </div>
 <div class="veil" id="veil"></div>
 <aside class="sheet" id="setSheet" role="dialog" aria-modal="true" aria-labelledby="setTitle">
@@ -3497,7 +3498,9 @@ const DOMAINS = MIX_D.map(([id, tags, ptags], i) => {
     return { text, data: data.length ? data.join(' ') : 'any', dev: list.includes('dev') };
   }) };
 });
-const TECHNIQUES = MIX_T.map(([id, stack, needs], i) => { const [name, how, challenge, gives] = TECH_TX[i]; return { id, stack, needs, name, how, challenge, gives }; });
+// язык может заменить стек техники (TECH_STACK_TX в его mix.js), если общий инструмент не работает с этим языком
+const TECHNIQUES = MIX_T.map(([id, stack, needs], i) => { const [name, how, challenge, gives] = TECH_TX[i];
+  return { id, stack: (typeof TECH_STACK_TX === 'object' && TECH_STACK_TX[id]) || stack, needs, name, how, challenge, gives }; });
 const FORMATS = MIX_F.map(([id, tags, c = {}], i) => { const [name, add, sentence] = FORMATS_TX[i]; return { id, tags, c, name, add, sentence }; });
 const MIX_TWISTS = MIX_A.map(([id, tags, c = {}], i) => ({ id, tags, c, text: TWISTS_TX[i] }));
 

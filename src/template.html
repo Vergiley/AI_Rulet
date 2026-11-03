@@ -463,7 +463,9 @@ const DOMAINS = MIX_D.map(([id, tags, ptags], i) => {
     return { text, data: data.length ? data.join(' ') : 'any', dev: list.includes('dev') };
   }) };
 });
-const TECHNIQUES = MIX_T.map(([id, stack, needs], i) => { const [name, how, challenge, gives] = TECH_TX[i]; return { id, stack, needs, name, how, challenge, gives }; });
+// язык может заменить стек техники (TECH_STACK_TX в его mix.js), если общий инструмент не работает с этим языком
+const TECHNIQUES = MIX_T.map(([id, stack, needs], i) => { const [name, how, challenge, gives] = TECH_TX[i];
+  return { id, stack: (typeof TECH_STACK_TX === 'object' && TECH_STACK_TX[id]) || stack, needs, name, how, challenge, gives }; });
 const FORMATS = MIX_F.map(([id, tags, c = {}], i) => { const [name, add, sentence] = FORMATS_TX[i]; return { id, tags, c, name, add, sentence }; });
 const MIX_TWISTS = MIX_A.map(([id, tags, c = {}], i) => ({ id, tags, c, text: TWISTS_TX[i] }));
 
