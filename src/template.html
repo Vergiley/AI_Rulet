@@ -524,7 +524,16 @@ function buildMix(fresh) {
   const as = o.a.filter(i => twistOk(i, fi)), spec = as.filter(i => MIX_TWISTS[i].tags !== 'any');
   return mixFrom(di, ti, wi, rand(techs[ti].gives.length), fi, spec.length && rand(3) ? pick(spec) : pick(as), rand(MIX_PHRASES.length));
 }
-const mergeStack = (a, b) => [...new Set([...a.split(','), ...b.split(',')].map(x => x.trim()))].join(', ');
+// стек техники + стек формата без повторов; «ESP32/Raspberry Pi» уже содержит Raspberry Pi — второй раз его не добавляем
+const mergeStack = (a, b) => {
+  const seen = new Set(), out = [];
+  for (const item of [...a.split(','), ...b.split(',')].map(x => x.trim())) {
+    const alts = item.split('/').map(x => x.trim());
+    if (alts.some(x => seen.has(x))) continue;
+    alts.forEach(x => seen.add(x)); out.push(item);
+  }
+  return out.join(', ');
+};
 // «Микс» по номерам сферы, техники, персоны, фразы «что даёт», формата, аномалии и формулировки — их же хранит ссылка на идею.
 // Ссылки старого вида — только первые четыре номера — дают прежнюю карточку без формата и аномалии
 function mixFrom(di, ti, wi, pi, fi = -1, ai = -1, vi = 0) {
@@ -2053,7 +2062,7 @@ const STAR_LOOK = {   // [центр диска, край диска, свече
 };
 const CONST_NAMES = T.constNames;
 const SERIF = '"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif';
-let sun = null, nextSun = 0, sunSprite = null, sunBusy = false, lastSunKind = '', lastConst = '';
+let sun = null, nextSun = 0, sunSprite = null, sunBusy = false, lastSunKind = '', lastConst = '', constBag = [];
 
 const rgba = (c, a) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
 function glowAt(g, x, y, r0, r1, col, a) {
@@ -2297,8 +2306,13 @@ function makeConstellation() {
   }
   const mx = pts.reduce((t, p) => t + p.x, 0) / n, my = pts.reduce((t, p) => t + p.y, 0) / n;
   for (const p of pts) { p.x -= mx; p.y -= my; p.c = DYN[Math.floor(Math.random() * DYN.length)]; }   // и цвет звезды
-  let name;
-  do name = CONST_NAMES[Math.floor(Math.random() * CONST_NAMES.length)]; while (name === lastConst);
+  // имена — «мешком»: каждое по разу в случайном порядке, потом новый круг; на стыке кругов не повторяется прошлое
+  if (!constBag.length) {
+    constBag = CONST_NAMES.slice();
+    for (let i = constBag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [constBag[i], constBag[j]] = [constBag[j], constBag[i]]; }
+    if (constBag.length > 1 && constBag[constBag.length - 1] === lastConst) [constBag[0], constBag[constBag.length - 1]] = [constBag[constBag.length - 1], constBag[0]];
+  }
+  const name = constBag.pop();
   lastConst = name;
   return { pts, edges, name };
 }

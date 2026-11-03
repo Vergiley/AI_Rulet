@@ -17,7 +17,11 @@ const T = {
   soundOn: 'Sound on', soundOff: 'Sound off',
   noise: 'abcdefghijklmnopqrstuvwxyz0123456789◇◆✦⋆∴≈≡░▒',   // знаки помех в «Расшифровке сигнала»
   constNames: ['Neuron', 'Perceptron', 'Transformer', 'Gradient', 'Tensor', 'Embedding', 'Attention', 'Diffusion',
-    'Token', 'Encoder', 'Decoder', 'Convolution', 'Agent', 'Latent space', 'Backpropagation', 'Random forest'],
+    'Token', 'Encoder', 'Decoder', 'Convolution', 'Agent', 'Latent space', 'Backpropagation', 'Random forest',
+    'Sigmoid', 'Softmax', 'Logit', 'Hidden layer', 'Autoencoder', 'Discriminator', 'Self-attention', 'Mixture of experts',
+    'Loss function', 'Learning rate', 'Epoch', 'Dropout', 'Regularization', 'Saddle point', 'Local minimum', 'Entropy',
+    'Prompt', 'Context window', 'Chain of thought', 'Temperature', 'Hallucination', 'Distillation', 'Quantization', 'Reward',
+    'Decision tree', 'Support vector', 'Ensemble', 'Markov chain', 'Bayesian network', 'Hopfield network', 'Boltzmann machine', 'Turing test'],
   groupFrom: 1000,   // с какого числа разбивать разряды: по-английски 1,536
   pl: {
     idea: { one: 'idea', other: 'ideas' },

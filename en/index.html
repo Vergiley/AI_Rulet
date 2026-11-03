@@ -490,7 +490,11 @@ const T = {
   soundOn: 'Sound on', soundOff: 'Sound off',
   noise: 'abcdefghijklmnopqrstuvwxyz0123456789◇◆✦⋆∴≈≡░▒',   // знаки помех в «Расшифровке сигнала»
   constNames: ['Neuron', 'Perceptron', 'Transformer', 'Gradient', 'Tensor', 'Embedding', 'Attention', 'Diffusion',
-    'Token', 'Encoder', 'Decoder', 'Convolution', 'Agent', 'Latent space', 'Backpropagation', 'Random forest'],
+    'Token', 'Encoder', 'Decoder', 'Convolution', 'Agent', 'Latent space', 'Backpropagation', 'Random forest',
+    'Sigmoid', 'Softmax', 'Logit', 'Hidden layer', 'Autoencoder', 'Discriminator', 'Self-attention', 'Mixture of experts',
+    'Loss function', 'Learning rate', 'Epoch', 'Dropout', 'Regularization', 'Saddle point', 'Local minimum', 'Entropy',
+    'Prompt', 'Context window', 'Chain of thought', 'Temperature', 'Hallucination', 'Distillation', 'Quantization', 'Reward',
+    'Decision tree', 'Support vector', 'Ensemble', 'Markov chain', 'Bayesian network', 'Hopfield network', 'Boltzmann machine', 'Turing test'],
   groupFrom: 1000,   // с какого числа разбивать разряды: по-английски 1,536
   pl: {
     idea: { one: 'idea', other: 'ideas' },
@@ -1744,7 +1748,7 @@ Fillable form from a flat PDF|Finds lines, boxes and signature fields in a flat 
 Speaker notes for a presentation|Writes a talk script and timed speaker notes for finished slides so an employee can confidently present a deck built by others.|Python, python-pptx, Vision LLM, LLM API|Prepared answers to likely audience questions|Collect 20–30 real-world PPTX decks of 10–30 slides on various topics~Describe each slide’s charts and diagrams along with its text using a Vision LLM~Use an LLM API to write a timed talk and add it to the slide notes
 Incoming mail registration for an organization|Registers incoming official letters for the records office: reads the scan, fills in the registration record and assigns an owner and a reply deadline.|Python, Tesseract, LLM API, PostgreSQL|Linking a reply to the original letter by reference number|Collect 200–300 anonymized incoming letters with their records from the records office log~Extract the sender, number, date, subject and requested deadline with an LLM API~Suggest an assignee based on the assignment history of similar letters in PostgreSQL
 Business letters from bullet points|An employee writes three or four bullet points, and the assistant turns them into a business letter in the organization’s house tone with proper salutations and required details.|Python, LLM API, docxtpl, Streamlit|Highlighting bureaucratese and overly long sentences|Collect 50–100 good letters of different types from the organization: request, refusal, claim~Retrieve similar letters as examples and generate the text with an LLM API~Insert the text into the organization’s letterhead with docxtpl, adding a number and date
-Migrating documents to a corporate wiki|Moves hundreds of scattered department DOCX and PDF files into a corporate wiki, cleaning up formatting, splitting text into pages by section and cross-linking them.|Python, Pandoc, LLM API, MkDocs|Detecting outdated documents with contradictory data|Collect 100–300 department documents in DOCX and PDF from different years~Convert the files to Markdown with Pandoc, then use an LLM API to clean up artifacts~Split documents into pages by section and cross-link them in MkDocs
+Migrating documents to a corporate wiki|Moves hundreds of scattered department DOCX and PDF files into a corporate wiki, cleaning up formatting, splitting text into pages by section and cross-linking them.|Python, Pandoc, Marker, LLM API, MkDocs|Detecting outdated documents with contradictory data|Collect 100–300 department documents in DOCX and PDF from different years~Convert DOCX to Markdown with Pandoc and PDF with Marker, then use an LLM API to clean up artifacts~Split documents into pages by section and cross-link them in MkDocs
 Table of contents and bookmarks for PDFs|Restores the structure of long PDFs without bookmarks by finding section headings and building a clickable table of contents and navigation for easier reading.|Python, PyMuPDF, scikit-learn, LLM API|Inferring section numbering from the content|Collect 30–50 long PDFs: reports, standards, books without bookmarks~Classify lines as headings by font, indentation and text with a scikit-learn model~Write the heading hierarchy into PDF bookmarks with PyMuPDF
 Weekly report from spreadsheets|Every week, turns sales or metrics exports into charts and a coherent narrative report for a manager, using the company template.|Python, Pandas, matplotlib, docxtpl, LLM API|Automatic cross-check of numbers in the text against tables and charts|Collect 8–12 weeks of CSV exports and a DOCX report template~Compute key metrics and week-over-week deviations in Pandas~Use an LLM API to comment on the deviations and render the report with docxtpl
 Layout-preserving DOCX translation|Translates DOCX documents into another language while keeping styles, tables, lists and headers and footers, so the translation doesn’t need reformatting by hand.|Python, python-docx, LLM API, LibreOffice|Fitting translation length to table cell widths|Pick 20–30 DOCX documents with complex tables, lists and headers and footers~Translate paragraph by paragraph with an LLM API, preserving the formatting runs~Write the translation back into the same runs with python-docx
@@ -3200,7 +3204,7 @@ const TECH_RULES = {
  'извлечение структурированных данных': { role: 'ext', llm: 1, ban: ['Сканы плохого качества и рукописные пометки'] },
  'суммаризация длинных текстов': { role: 'ext', llm: 1, ban: ['Каждое решение объясняется простыми словами', 'Ответ быстрее чем за секунду', 'Журнал всех решений для последующей проверки'] },
  'распознавание речи': { role: 'ext', ban: ['Шумная обстановка и несколько голосов сразу', 'Акценты и профессиональный жаргон'] },
- 'диаризация говорящих': { role: 'ext', ban: ['виджет чата на сайте', 'Шумная обстановка и несколько голосов сразу', 'Ответ быстрее чем за секунду', 'Акценты и профессиональный жаргон'] },
+ 'диаризация говорящих': { role: 'ext', ban: ['виджет чата на сайте', 'Пишут с ошибками, сленгом и эмодзи', 'Шумная обстановка и несколько голосов сразу', 'Ответ быстрее чем за секунду', 'Акценты и профессиональный жаргон'] },
  'кластеризация и тематическое моделирование': { role: 'ext', llm: 1, ban: ['Ответ быстрее чем за секунду'] },
  'классификатор на эмбеддингах': { role: 'ext', llm: 1 },
  'анализ тональности и эмоций': { role: 'ext', llm: 1 },
@@ -3560,7 +3564,16 @@ function buildMix(fresh) {
   const as = o.a.filter(i => twistOk(i, fi)), spec = as.filter(i => MIX_TWISTS[i].tags !== 'any');
   return mixFrom(di, ti, wi, rand(techs[ti].gives.length), fi, spec.length && rand(3) ? pick(spec) : pick(as), rand(MIX_PHRASES.length));
 }
-const mergeStack = (a, b) => [...new Set([...a.split(','), ...b.split(',')].map(x => x.trim()))].join(', ');
+// стек техники + стек формата без повторов; «ESP32/Raspberry Pi» уже содержит Raspberry Pi — второй раз его не добавляем
+const mergeStack = (a, b) => {
+  const seen = new Set(), out = [];
+  for (const item of [...a.split(','), ...b.split(',')].map(x => x.trim())) {
+    const alts = item.split('/').map(x => x.trim());
+    if (alts.some(x => seen.has(x))) continue;
+    alts.forEach(x => seen.add(x)); out.push(item);
+  }
+  return out.join(', ');
+};
 // «Микс» по номерам сферы, техники, персоны, фразы «что даёт», формата, аномалии и формулировки — их же хранит ссылка на идею.
 // Ссылки старого вида — только первые четыре номера — дают прежнюю карточку без формата и аномалии
 function mixFrom(di, ti, wi, pi, fi = -1, ai = -1, vi = 0) {
@@ -5089,7 +5102,7 @@ const STAR_LOOK = {   // [центр диска, край диска, свече
 };
 const CONST_NAMES = T.constNames;
 const SERIF = '"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif';
-let sun = null, nextSun = 0, sunSprite = null, sunBusy = false, lastSunKind = '', lastConst = '';
+let sun = null, nextSun = 0, sunSprite = null, sunBusy = false, lastSunKind = '', lastConst = '', constBag = [];
 
 const rgba = (c, a) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
 function glowAt(g, x, y, r0, r1, col, a) {
@@ -5333,8 +5346,13 @@ function makeConstellation() {
   }
   const mx = pts.reduce((t, p) => t + p.x, 0) / n, my = pts.reduce((t, p) => t + p.y, 0) / n;
   for (const p of pts) { p.x -= mx; p.y -= my; p.c = DYN[Math.floor(Math.random() * DYN.length)]; }   // и цвет звезды
-  let name;
-  do name = CONST_NAMES[Math.floor(Math.random() * CONST_NAMES.length)]; while (name === lastConst);
+  // имена — «мешком»: каждое по разу в случайном порядке, потом новый круг; на стыке кругов не повторяется прошлое
+  if (!constBag.length) {
+    constBag = CONST_NAMES.slice();
+    for (let i = constBag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [constBag[i], constBag[j]] = [constBag[j], constBag[i]]; }
+    if (constBag.length > 1 && constBag[constBag.length - 1] === lastConst) [constBag[0], constBag[constBag.length - 1]] = [constBag[constBag.length - 1], constBag[0]];
+  }
+  const name = constBag.pop();
   lastConst = name;
   return { pts, edges, name };
 }

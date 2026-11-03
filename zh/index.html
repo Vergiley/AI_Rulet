@@ -490,7 +490,11 @@ const T = {
   soundOn: '声音已开启', soundOff: '声音已关闭',
   noise: '的一是不了人我在有他这为之大来以个中上们到说国和地也子时道出而要于就下得可你年生0123456789◇◆✦⋆∴≈≡░▒',   // знаки помех в «Расшифровке сигнала»
   constNames: ['神经元', '感知机', 'Transformer', '梯度', '张量', '嵌入', '注意力', '扩散',
-    '词元', '编码器', '解码器', '卷积', '智能体', '潜空间', '反向传播', '随机森林'],
+    '词元', '编码器', '解码器', '卷积', '智能体', '潜空间', '反向传播', '随机森林',
+    'Sigmoid 函数', 'Softmax', 'Logit', '隐藏层', '自编码器', '判别器', '自注意力', '混合专家',
+    '损失函数', '学习率', '轮次', '随机失活', '正则化', '鞍点', '局部极小值', '熵',
+    '提示词', '上下文窗口', '思维链', '温度', '幻觉', '知识蒸馏', '量化', '奖励',
+    '决策树', '支持向量', '集成学习', '马尔可夫链', '贝叶斯网络', '霍普菲尔德网络', '玻尔兹曼机', '图灵测试'],
   groupFrom: 10000,   // с какого числа разбивать разряды: 1536, но 3,072,735
   pl: {
     idea: { other: '个创意' },
@@ -1744,7 +1748,7 @@ SQL 查询中的梯度提升|将训练好的梯度提升模型转换为 SQL 表�
 演示文稿讲稿生成|为已完成的幻灯片编写演讲稿和带时间安排的备注，让员工能自信地讲解别人做的演示文稿。|Python, python-pptx, Vision LLM, LLM API|预先准备听众可能提问的答案|收集 20–30 份主题各异的真实 PPTX 演示文稿，每份 10–30 页~用视觉大模型描述每页幻灯片中的图表、示意图及文字~用 LLM API 撰写带时间安排的讲稿，并添加到幻灯片备注中
 机构收文登记|为文书部门登记收到的公文：读取扫描件、填写登记卡片，并指定承办人和答复期限。|Python, Tesseract, LLM API, PostgreSQL|根据文号将回函与原函关联|从文书部门的登记簿中收集 200–300 份匿名化的来文及其登记记录~用 LLM API 提取发文单位、文号、日期、事由和要求的期限~根据 PostgreSQL 中类似来文的分办历史推荐承办人
 要点扩写公务信函|员工写下三四条要点，助手即可按机构惯用的语气将其扩写为公务信函，并配上得体的称呼和必要的落款信息。|Python, LLM API, docxtpl, Streamlit|标出官腔套话和过长的句子|收集机构内 50–100 封不同类型的优秀信函：请求函、拒绝函、索赔函~检索相似信函作为示例，并用 LLM API 生成正文~用 docxtpl 将正文套入机构信笺，并加上编号和日期
-文档迁移到企业维基|将部门散落的数百份 DOCX 和 PDF 文件迁移到企业维基，清理格式，按章节拆分为页面并建立相互链接。|Python, Pandoc, LLM API, MkDocs|发现数据相互矛盾的过时文档|收集部门不同年份的 100–300 份 DOCX 和 PDF 文档~用 Pandoc 将文件转换为 Markdown，再用 LLM API 清理残留格式~在 MkDocs 中按章节将文档拆分为页面，并建立相互链接
+文档迁移到企业维基|将部门散落的数百份 DOCX 和 PDF 文件迁移到企业维基，清理格式，按章节拆分为页面并建立相互链接。|Python, Pandoc, Marker, LLM API, MkDocs|发现数据相互矛盾的过时文档|收集部门不同年份的 100–300 份 DOCX 和 PDF 文档~用 Pandoc 将 DOCX、用 Marker 将 PDF 转换为 Markdown，再用 LLM API 清理残留格式~在 MkDocs 中按章节将文档拆分为页面，并建立相互链接
 PDF 目录与书签生成|为没有书签的长篇 PDF 找出章节标题，构建可点击的目录和导航，恢复文档结构，方便阅读。|Python, PyMuPDF, scikit-learn, LLM API|根据内容推断章节编号|收集 30–50 份长篇 PDF：没有书签的报告、标准和书籍~用 scikit-learn 模型根据字体、缩进和文字判断各行是否为标题~借助 PyMuPDF 将标题层级写入 PDF 书签
 基于表格数据的周报|每周用公司模板把销售或指标导出数据转换为图表和一份连贯的文字报告，交给管理者。|Python, Pandas, matplotlib, docxtpl, LLM API|自动核对正文中的数字与表格和图表是否一致|收集 8–12 周的 CSV 导出数据和一个 DOCX 报告模板~在 Pandas 中计算关键指标及其环比偏差~用 LLM API 点评偏差，并用 docxtpl 渲染报告
 保留版式的 DOCX 翻译|将 DOCX 文档翻译成另一种语言，同时保留样式、表格、列表和页眉页脚，译文无需手动重新排版。|Python, python-docx, LLM API, LibreOffice|让译文长度适应表格单元格的宽度|挑选 20–30 份带复杂表格、列表和页眉页脚的 DOCX 文档~用 LLM API 逐段翻译，并保留各个格式文本块（run）~借助 python-docx 将译文写回原来的文本块
@@ -3200,7 +3204,7 @@ const TECH_RULES = {
  'извлечение структурированных данных': { role: 'ext', llm: 1, ban: ['Сканы плохого качества и рукописные пометки'] },
  'суммаризация длинных текстов': { role: 'ext', llm: 1, ban: ['Каждое решение объясняется простыми словами', 'Ответ быстрее чем за секунду', 'Журнал всех решений для последующей проверки'] },
  'распознавание речи': { role: 'ext', ban: ['Шумная обстановка и несколько голосов сразу', 'Акценты и профессиональный жаргон'] },
- 'диаризация говорящих': { role: 'ext', ban: ['виджет чата на сайте', 'Шумная обстановка и несколько голосов сразу', 'Ответ быстрее чем за секунду', 'Акценты и профессиональный жаргон'] },
+ 'диаризация говорящих': { role: 'ext', ban: ['виджет чата на сайте', 'Пишут с ошибками, сленгом и эмодзи', 'Шумная обстановка и несколько голосов сразу', 'Ответ быстрее чем за секунду', 'Акценты и профессиональный жаргон'] },
  'кластеризация и тематическое моделирование': { role: 'ext', llm: 1, ban: ['Ответ быстрее чем за секунду'] },
  'классификатор на эмбеддингах': { role: 'ext', llm: 1 },
  'анализ тональности и эмоций': { role: 'ext', llm: 1 },
@@ -3621,7 +3625,16 @@ function buildMix(fresh) {
   const as = o.a.filter(i => twistOk(i, fi)), spec = as.filter(i => MIX_TWISTS[i].tags !== 'any');
   return mixFrom(di, ti, wi, rand(techs[ti].gives.length), fi, spec.length && rand(3) ? pick(spec) : pick(as), rand(MIX_PHRASES.length));
 }
-const mergeStack = (a, b) => [...new Set([...a.split(','), ...b.split(',')].map(x => x.trim()))].join(', ');
+// стек техники + стек формата без повторов; «ESP32/Raspberry Pi» уже содержит Raspberry Pi — второй раз его не добавляем
+const mergeStack = (a, b) => {
+  const seen = new Set(), out = [];
+  for (const item of [...a.split(','), ...b.split(',')].map(x => x.trim())) {
+    const alts = item.split('/').map(x => x.trim());
+    if (alts.some(x => seen.has(x))) continue;
+    alts.forEach(x => seen.add(x)); out.push(item);
+  }
+  return out.join(', ');
+};
 // «Микс» по номерам сферы, техники, персоны, фразы «что даёт», формата, аномалии и формулировки — их же хранит ссылка на идею.
 // Ссылки старого вида — только первые четыре номера — дают прежнюю карточку без формата и аномалии
 function mixFrom(di, ti, wi, pi, fi = -1, ai = -1, vi = 0) {
@@ -5150,7 +5163,7 @@ const STAR_LOOK = {   // [центр диска, край диска, свече
 };
 const CONST_NAMES = T.constNames;
 const SERIF = '"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif';
-let sun = null, nextSun = 0, sunSprite = null, sunBusy = false, lastSunKind = '', lastConst = '';
+let sun = null, nextSun = 0, sunSprite = null, sunBusy = false, lastSunKind = '', lastConst = '', constBag = [];
 
 const rgba = (c, a) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
 function glowAt(g, x, y, r0, r1, col, a) {
@@ -5394,8 +5407,13 @@ function makeConstellation() {
   }
   const mx = pts.reduce((t, p) => t + p.x, 0) / n, my = pts.reduce((t, p) => t + p.y, 0) / n;
   for (const p of pts) { p.x -= mx; p.y -= my; p.c = DYN[Math.floor(Math.random() * DYN.length)]; }   // и цвет звезды
-  let name;
-  do name = CONST_NAMES[Math.floor(Math.random() * CONST_NAMES.length)]; while (name === lastConst);
+  // имена — «мешком»: каждое по разу в случайном порядке, потом новый круг; на стыке кругов не повторяется прошлое
+  if (!constBag.length) {
+    constBag = CONST_NAMES.slice();
+    for (let i = constBag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [constBag[i], constBag[j]] = [constBag[j], constBag[i]]; }
+    if (constBag.length > 1 && constBag[constBag.length - 1] === lastConst) [constBag[0], constBag[constBag.length - 1]] = [constBag[constBag.length - 1], constBag[0]];
+  }
+  const name = constBag.pop();
   lastConst = name;
   return { pts, edges, name };
 }
