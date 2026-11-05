@@ -9,9 +9,9 @@
   catalog.js — CATEGORIES: области и идеи;
   mix.js     — тексты «Микса»: сферы, техники, форматы, аномалии, фразы.
 Общее для всех языков: src/template.html (вёрстка, стили, код) и src/shared/mix.js (структура «Микса»).
-Запуск: python3 build.py
+Запуск: python3 build.py (нужен Node.js: им сборка считает числа для справки)
 """
-import json, os, re, sys
+import datetime, json, os, re, subprocess, sys
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 SITE = 'https://airulet.dev/'
@@ -27,6 +27,9 @@ LANGS = [
     ('he', 'עברית', 'he/', 'rtl', 'he_IL', 'he'),
 ]
 FILES = ['strings.js', 'page.json', 'help.html', 'catalog.js', 'mix.js']
+X_DEFAULT = 'en/'   # x-default: куда поисковик ведёт тех, чьего языка на сайте нет
+LIST_SEP = {'zh': '；', 'ar': '، ', 'fa': '، '}   # разделитель перечня областей в справке (по умолчанию «, »; в китайском «；» — в названиях уже есть «、»)
+PURE_END = '/*@@PURE_END@@*/'   # метка в template.html: выше неё — данные и чистые функции страницы
 
 
 def read(path):
@@ -104,30 +107,59 @@ def build(lang, ready):
             for l in ready)
         nav = f'  <nav class="langs" aria-label="{page["lang_nav"]}">{links}</nav>\n'
         alt = ''.join(f'<link rel="alternate" hreflang="{l[5]}" href="{SITE}{l[2]}">\n' for l in ready) + \
-              f'<link rel="alternate" hreflang="x-default" href="{SITE}">\n'
+              f'<link rel="alternate" hreflang="x-default" href="{SITE}{X_DEFAULT}">\n'
     else:
         nav = alt = ''
-    # описание для поисковиков (schema.org): что это за страница, на каком языке, бесплатно, без установки
-    ld = {'@context': 'https://schema.org', '@type': 'WebApplication', 'name': 'AI_Rulet', 'url': SITE + folder,
-          'description': page['og_description'], 'inLanguage': tag, 'image': SITE + folder + 'og.jpg',
-          'applicationCategory': 'EducationalApplication', 'operatingSystem': 'Any', 'browserRequirements': 'Requires JavaScript',
-          'isAccessibleForFree': True, 'offers': {'@type': 'Offer', 'price': '0', 'priceCurrency': 'USD'},
-          'license': 'https://opensource.org/licenses/MIT'}
+    # описание для поисковиков (schema.org): сайт (по нему Google берёт название сайта в выдаче) и сама страница —
+    # что это, на каком языке, бесплатно, без установки
+    ld = {'@context': 'https://schema.org', '@graph': [
+        {'@type': 'WebSite', '@id': SITE + '#website', 'name': 'AI_Rulet', 'alternateName': ['AI Rulet', 'airulet.dev'],
+         'url': SITE, 'inLanguage': [l[5] for l in ready]},
+        {'@type': 'WebApplication', 'name': 'AI_Rulet', 'url': SITE + folder, 'isPartOf': {'@id': SITE + '#website'},
+         'description': page['og_description'], 'inLanguage': tag, 'image': SITE + folder + 'og.jpg',
+         'applicationCategory': 'EducationalApplication', 'operatingSystem': 'Any', 'browserRequirements': 'Requires JavaScript',
+         'isAccessibleForFree': True, 'offers': {'@type': 'Offer', 'price': '0', 'priceCurrency': 'USD'},
+         'author': {'@type': 'Person', 'name': 'A.Alexandr.N', 'url': 'https://github.com/Vergiley'},
+         'license': 'https://opensource.org/licenses/MIT'}]}
     jsonld = '<script type="application/ld+json">' + json.dumps(ld, ensure_ascii=False).replace('</', '<\\/') + '</script>\n'
     if not os.path.isfile(os.path.join(ROOT, folder, 'og.jpg')):
         print(f'{code}: нет {folder}og.jpg — картинка превью (сделать: ai_rulet_tools/seo/make_og.py)')
     s = s.replace('{{@langs}}', nav).replace('{{@hreflang}}', alt).replace('{{@jsonld}}', jsonld) \
          .replace('{{@help}}', read(f'src/lang/{code}/help.html'))
-    values = dict(page, lang=tag, dir=direction, page_url=SITE + folder, locale=locale)
+    values = dict(page, lang=tag, dir=direction, page_url=SITE + folder, locale=locale, root=rel(folder, ''))
     s = re.sub(r'\{\{(\w+)\}\}', lambda m: values[m.group(1)], s)
+    s = prerender(s, code, page)
     left = re.findall(r'\{\{@?\w+\}\}|/\*@@\w+@@\*/', s)
     if left:
         sys.exit(f'{code}: не подставлено {left[:5]}')
     out = os.path.join(ROOT, folder, 'index.html')
     os.makedirs(os.path.dirname(out), exist_ok=True)
-    with open(out, 'w', encoding='utf-8', newline='\n') as f:
-        f.write(s)
-    return out, len(s.encode('utf-8'))
+    changed = not os.path.isfile(out) or open(out, encoding='utf-8').read() != s
+    if changed:
+        with open(out, 'w', encoding='utf-8', newline='\n') as f:
+            f.write(s)
+    return out, len(s.encode('utf-8')), changed
+
+
+def prerender(s, code, page):
+    """справка без скрипта: числа идей, областей и сочетаний и перечень областей — прямо в HTML (для поисковиков).
+    Числа считает сам код страницы: build.py выполняет в node её данные и чистые функции (всё, что выше PURE_END)"""
+    data, app = re.findall(r'<script>\n(.*?)</script>', s, re.S)[:2]
+    head = re.sub(r"^\s*\(\(\) => \{\s*'use strict';", '', app[:app.index(PURE_END)])
+    req = re.findall(r'<span data-n="(\w+)" data-pl="(\w+)"></span>', s)
+    js = data + head + f'\nprocess.stdout.write(JSON.stringify({{n: {json.dumps(req)}.map(([k, pl]) => count(HELP_N[k], pl)), ' \
+                       f'areas: CATEGORIES.map(c => c.name)}}));\n'
+    try:
+        r = subprocess.run(['node', '-'], input=js, capture_output=True, text=True, encoding='utf-8', timeout=60)
+    except FileNotFoundError:
+        sys.exit('нужен Node.js: им сборка считает числа для справки')
+    if r.returncode:
+        sys.exit(f'{code}: node не выполнил код страницы\n{r.stderr[-2000:]}')
+    got = json.loads(r.stdout)
+    for (k, pl), text in zip(req, got['n']):
+        s = s.replace(f'<span data-n="{k}" data-pl="{pl}"></span>', f'<span data-n="{k}" data-pl="{pl}">{text}</span>', 1)
+    areas = LIST_SEP.get(code, ', ').join(got['areas'])
+    return s.replace('{{@areas}}', f'<dt>{page["areas"]}</dt><dd>{areas}</dd>').replace(PURE_END, '')
 
 
 def main():
@@ -135,18 +167,33 @@ def main():
     ru = next(l for l in ready if l[0] == 'ru')
     for lang in ready:
         check(lang, ru)
+    old = old_lastmod()
+    today = datetime.date.today().isoformat()
+    lastmod = {}
     for lang in ready:
-        out, size = build(lang, ready)
-        print(f'{lang[0]}: {os.path.relpath(out, ROOT)} — {size / 1024:.0f} КБ')
+        out, size, changed = build(lang, ready)
+        url = SITE + lang[2]
+        lastmod[url] = today if changed or url not in old else old[url]
+        print(f'{lang[0]}: {os.path.relpath(out, ROOT)} — {size / 1024:.0f} КБ' + ('' if changed else ' (без изменений)'))
     open(os.path.join(ROOT, '.nojekyll'), 'a').close()   # GitHub Pages отдаёт файлы как есть, без Jekyll
-    write_sitemap(ready)
+    write_sitemap(ready, lastmod)
 
 
-def write_sitemap(ready):
-    """sitemap.xml со всеми языками (у каждой страницы — ссылки на её версии) и robots.txt со ссылкой на него"""
+def old_lastmod():
+    """даты изменения страниц из прежнего sitemap.xml: у страницы, которая не изменилась, дата остаётся прежней"""
+    try:
+        xml = read('sitemap.xml')
+    except FileNotFoundError:
+        return {}
+    return dict(re.findall(r'<loc>([^<]+)</loc>\s*<lastmod>([^<]+)</lastmod>', xml))
+
+
+def write_sitemap(ready, lastmod):
+    """sitemap.xml со всеми языками (у каждой страницы — дата изменения и ссылки на её версии) и robots.txt со ссылкой на него"""
     alts = ''.join(f'    <xhtml:link rel="alternate" hreflang="{l[5]}" href="{SITE}{l[2]}"/>\n' for l in ready) + \
-           f'    <xhtml:link rel="alternate" hreflang="x-default" href="{SITE}"/>\n'
-    urls = ''.join(f'  <url>\n    <loc>{SITE}{l[2]}</loc>\n{alts}  </url>\n' for l in ready)
+           f'    <xhtml:link rel="alternate" hreflang="x-default" href="{SITE}{X_DEFAULT}"/>\n'
+    urls = ''.join(f'  <url>\n    <loc>{SITE}{l[2]}</loc>\n    <lastmod>{lastmod[SITE + l[2]]}</lastmod>\n{alts}  </url>\n'
+                   for l in ready)
     xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
            f'{urls}</urlset>\n')
